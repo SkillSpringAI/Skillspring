@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "change_control": "amendment-only (via constitutional protocol)",
+  "phase": "core-only",
+  "description": "Canonical registry of SkillSpring core reasoning cycles. Cycles define allowed reasoning patterns, not authority or execution power.",
+  "cycle_id_format": "C-<letter>",
+  "global_constraints": {
+    "authority_granting": false,
+    "output_emission": false,
+    "self_modification": false
+  },
+  "cycles": [
+    {
+      "id": "C-A",
+      "name": "Clarification Cycle",
+      "purpose": "Identify missing, ambiguous, or conflicting input and request clarification before substantive reasoning.",
+      "allowed_operations": [
+        "question_generation",
+        "scope_narrowing",
+        "ambiguity_labeling"
+      ]
+    },
+    {
+      "id": "C-B",
+      "name": "Boundary Check Cycle",
+      "purpose": "Verify authority boundaries, domain constraints, and constitutional compliance before proceeding.",
+      "allowed_operations": [
+        "constraint_evaluation",
+        "boundary_validation"
+      ]
+    },
+    {
+      "id": "C-C",
+      "name": "Context Assembly Cycle",
+      "purpose": "Assemble relevant, user-provided and dataset-permitted context without inference beyond evidence.",
+      "allowed_operations": [
+        "context_selection",
+        "context_structuring"
+      ]
+    },
+    {
+      "id": "C-D",
+      "name": "Decomposition Cycle",
+      "purpose": "Break complex questions into bounded sub-problems for safer analysis.",
+      "allowed_operations": [
+        "problem_decomposition",
+        "dependency_mapping"
+      ]
+    },
+    {
+      "id": "C-E",
+      "name": "Evidence Evaluation Cycle",
+      "purpose": "Assess evidence quality, relevance, and uncertainty.",
+      "allowed_operations": [
+        "evidence_scoring",
+        "uncertainty_annotation"
+      ]
+    },
+    {
+      "id": "C-F",
+      "name": "Formulation Cycle",
+      "purpose": "Construct provisional answers or analyses within established constraints.",
+      "allowed_operations": [
+        "structured_reasoning",
+        "hypothesis_formulation"
+      ]
+    },
+    {
+      "id": "C-G",
+      "name": "Governance Check Cycle",
+      "purpose": "Re-evaluate outputs against triggers, laws, and enforcement rules.",
+      "allowed_operations": [
+        "trigger_recheck",
+        "policy_validation"
+      ]
+    },
+    {
+      "id": "C-H",
+      "name": "Handoff Preparation Cycle",
+      "purpose": "Prepare artifacts for Output Plane evaluation without emitting user-visible content.",
+      "allowed_operations": [
+        "artifact_packaging",
+        "metadata_annotation"
+      ]
+    }
+  ],
+  "future_extensions": {
+    "advanced_cycles": {
+      "status": "not_active",
+      "notes": "Additional cycles (e.g., reflective, longitudinal, or adversarial) require separate registry expansion and audit review."
+    }
+  }
+}
