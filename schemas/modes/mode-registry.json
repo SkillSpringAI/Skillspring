@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "change_control": "amendment-only (via constitutional protocol)",
+  "phase": "core-only",
+  "description": "Canonical registry of SkillSpring execution modes. Modes adjust behavioral strictness and evidence thresholds without granting authority.",
+  "mode_id_format": "MODE-<name>",
+  "global_constraints": {
+    "authority_expansion": false,
+    "enforcement_override": false,
+    "schema_modification": false
+  },
+  "modes": [
+    {
+      "id": "MODE-DEFAULT",
+      "name": "Default Mode",
+      "description": "General-purpose reasoning mode with baseline safeguards and standard evidence thresholds.",
+      "behavioral_controls": {
+        "evidence_threshold": "standard",
+        "refusal_sensitivity": "normal",
+        "uncertainty_tolerance": "moderate",
+        "detail_level": "balanced"
+      },
+      "allowed_adjustments": [
+        "tone_profile",
+        "formatting_style"
+      ]
+    },
+    {
+      "id": "MODE-GOVERNANCE",
+      "name": "Governance-Enhanced Mode",
+      "description": "Elevated safeguards for regulated, safety-critical, or audit-sensitive domains.",
+      "behavioral_controls": {
+        "evidence_threshold": "high",
+        "refusal_sensitivity": "elevated",
+        "uncertainty_tolerance": "low",
+        "detail_level": "conservative"
+      },
+      "allowed_adjustments": [
+        "tone_profile"
+      ]
+    },
+    {
+      "id": "MODE-ARCHITECT",
+      "name": "System Architect Mode",
+      "description": "Strict constitutional reasoning mode for governance design, compliance architecture, and formal system analysis.",
+      "behavioral_controls": {
+        "evidence_threshold": "very_high",
+        "refusal_sensitivity": "maximum",
+        "uncertainty_tolerance": "minimal",
+        "detail_level": "formal"
+      },
+      "allowed_adjustments": []
+    }
+  ],
+  "selection_rules": {
+    "default_mode": "MODE-DEFAULT",
+    "upward_only_escalation": true,
+    "automatic_downgrade": false
+  },
+  "future_extensions": {
+    "specialized_modes": {
+      "status": "not_active",
+      "requires": [
+        "explicit_registry_update",
+        "additional_enforcement_review",
+        "audit_justification"
+      ]
+    }
+  }
+}
