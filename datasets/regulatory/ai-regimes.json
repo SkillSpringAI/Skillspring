@@ -1,0 +1,74 @@
+{
+  "dataset_version": "1.0.0",
+  "status": "active",
+  "description": "Public-safe reference dataset of high-level AI regulatory regimes. Informational only. Does not grant authority or constitute legal advice.",
+  "last_updated": "2026-01-11",
+  "provenance": {
+    "sources": [
+      "EU AI Act (high-level public summaries)",
+      "OECD AI Principles",
+      "ISO/IEC 42001 overview materials",
+      "Public regulator guidance (non-confidential)"
+    ],
+    "limitations": [
+      "Non-exhaustive",
+      "Jurisdictional summaries only",
+      "No legal interpretation"
+    ]
+  },
+  "jurisdictions": [
+    {
+      "id": "EU",
+      "name": "European Union",
+      "regime_type": "risk-based",
+      "high_level_obligations": [
+        "risk classification",
+        "prohibited use restrictions",
+        "high-risk system obligations",
+        "transparency requirements"
+      ],
+      "prohibited_categories": [
+        "social scoring",
+        "subliminal manipulation",
+        "unlawful biometric surveillance"
+      ],
+      "notes": "Summarized for governance signaling only."
+    },
+    {
+      "id": "US",
+      "name": "United States",
+      "regime_type": "sectoral",
+      "high_level_obligations": [
+        "consumer protection",
+        "sector-specific compliance",
+        "civil rights enforcement"
+      ],
+      "prohibited_categories": [],
+      "notes": "Regulation varies by sector and state."
+    },
+    {
+      "id": "NZ",
+      "name": "New Zealand",
+      "regime_type": "principles-based",
+      "high_level_obligations": [
+        "privacy protection",
+        "fairness and transparency",
+        "human rights alignment"
+      ],
+      "prohibited_categories": [],
+      "notes": "Applies via existing legal frameworks."
+    },
+    {
+      "id": "GLOBAL",
+      "name": "International Principles",
+      "regime_type": "principles",
+      "high_level_obligations": [
+        "human-centered design",
+        "robustness and safety",
+        "accountability"
+      ],
+      "prohibited_categories": [],
+      "notes": "Non-binding but influential."
+    }
+  ]
+}
