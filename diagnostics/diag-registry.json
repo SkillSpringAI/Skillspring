@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "description": "Registry of diagnostic checks for SkillSpring governance, datasets, and enforcement expectations.",
+  "diagnostics": [
+    {
+      "id": "DIAG-01",
+      "name": "Trigger Registry Integrity",
+      "scope": "schemas/triggers",
+      "purpose": "Ensure trigger registry exists, is valid JSON, and contains no authority-granting fields."
+    },
+    {
+      "id": "DIAG-02",
+      "name": "Dataset Presence Check",
+      "scope": "datasets",
+      "purpose": "Ensure required datasets are present and versioned."
+    },
+    {
+      "id": "DIAG-03",
+      "name": "Trigger–Dataset Mapping Coverage",
+      "scope": "docs",
+      "purpose": "Ensure every trigger is mapped to at least one dataset."
+    },
+    {
+      "id": "DIAG-04",
+      "name": "Output Admissibility Schema Validation",
+      "scope": "schemas/outputs",
+      "purpose": "Ensure output admissibility schema exists and forbids additional properties."
+    }
+  ]
+}
