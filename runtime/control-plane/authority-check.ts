@@ -1,9 +1,20 @@
+import { ControlContext, ControlDecision } from "./control-plane.types";
+
 /**
  * Authority Check
- * Purpose: Verify that requested behavior is within constitutional bounds.
- * Authority: Gatekeeper only.
+ * Absolute boundary enforcement.
  */
 
-export function checkAuthority(_request: unknown): never {
-  throw new Error("Authority check not implemented. Control Plane stub.");
+export function checkAuthority(context: ControlContext): ControlDecision {
+  if (context.authorityRequested === true) {
+    return {
+      status: "refuse",
+      reason: "Authority escalation is prohibited by constitutional rules."
+    };
+  }
+
+  return {
+    status: "allow",
+    mode: "UNCHANGED"
+  };
 }

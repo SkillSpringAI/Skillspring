@@ -1,9 +1,20 @@
+import { ControlContext, ControlDecision } from "./control-plane.types";
+
 /**
  * Jurisdiction Resolver
- * Purpose: Determine applicable jurisdiction and regulatory context.
- * Authority: Classification only.
+ * Explicit only. Ambiguity fails closed.
  */
 
-export function resolveJurisdiction(_input: unknown): never {
-  throw new Error("Jurisdiction resolution not implemented. Control Plane stub.");
+export function resolveJurisdiction(context: ControlContext): ControlDecision {
+  if (!context.jurisdiction) {
+    return {
+      status: "clarify",
+      reason: "Jurisdiction not specified. Unable to determine legal constraints."
+    };
+  }
+
+  return {
+    status: "allow",
+    mode: "UNCHANGED"
+  };
 }

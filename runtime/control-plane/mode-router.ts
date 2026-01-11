@@ -1,9 +1,28 @@
+import { ControlContext, ControlDecision } from "./control-plane.types";
+
 /**
  * Mode Router
- * Purpose: Select execution mode based on control-plane resolution.
- * Authority: None. Selection only.
+ * Deterministic mode selection only.
+ * No inference. No escalation without signal.
  */
 
-export function routeMode(_context: unknown): never {
-  throw new Error("Mode routing not implemented. Control Plane stub.");
+export function routeMode(context: ControlContext): ControlDecision {
+  if (!context.domain) {
+    return {
+      status: "clarify",
+      reason: "Domain not specified. Control Plane requires domain context."
+    };
+  }
+
+  if (context.domain === "governance" || context.domain === "regulated") {
+    return {
+      status: "allow",
+      mode: "MODE-GOVERNANCE"
+    };
+  }
+
+  return {
+    status: "allow",
+    mode: "MODE-DEFAULT"
+  };
 }
