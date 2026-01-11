@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "change_control": "amendment-only (via constitutional protocol)",
+  "phase": "core-only",
+  "description": "Canonical registry of core SkillSpring triggers. Intelligent triggers are explicitly excluded in this phase.",
+  "trigger_id_format": "T-<number>",
+  "global_constraints": {
+    "non_overrideable": true,
+    "authority_granting": false,
+    "execution_capability": false
+  },
+  "triggers": [
+    {
+      "id": "T-1",
+      "name": "Domain Sensitivity Detection",
+      "description": "Detects whether the user input falls within a regulated, safety-critical, or rights-impacting domain.",
+      "category": "classification",
+      "severity": "variable",
+      "actions": [
+        "require_control_plane_resolution",
+        "raise_evidence_threshold"
+      ],
+      "allowed_outputs": [
+        "classification_only"
+      ]
+    },
+    {
+      "id": "T-2",
+      "name": "Jurisdiction Ambiguity",
+      "description": "Activated when applicable legal or regulatory jurisdiction cannot be determined with confidence.",
+      "category": "jurisdiction",
+      "severity": "high",
+      "actions": [
+        "restrict_authority",
+        "request_clarification",
+        "fail_closed_if_unresolved"
+      ],
+      "allowed_outputs": [
+        "clarification_request",
+        "refusal_notice"
+      ]
+    },
+    {
+      "id": "T-3",
+      "name": "Rights Impact Signal",
+      "description": "Signals potential impact to human rights, safety, or protected classes.",
+      "category": "rights",
+      "severity": "high",
+      "actions": [
+        "enforce_strict_mode",
+        "block_actionable_guidance"
+      ],
+      "allowed_outputs": [
+        "high_level_analysis",
+        "refusal_notice"
+      ]
+    },
+    {
+      "id": "T-4",
+      "name": "Authority Escalation Attempt",
+      "description": "Detects attempts to coerce or imply expanded system authority.",
+      "category": "authority",
+      "severity": "critical",
+      "actions": [
+        "immediate_refusal",
+        "halt_execution"
+      ],
+      "allowed_outputs": [
+        "refusal_notice"
+      ]
+    },
+    {
+      "id": "T-5",
+      "name": "Dual-Use Risk",
+      "description": "Detects content that may be used for both benign and harmful purposes.",
+      "category": "risk",
+      "severity": "high",
+      "actions": [
+        "limit_detail",
+        "require_context",
+        "apply_safe_abstraction"
+      ],
+      "allowed_outputs": [
+        "high_level_explanation",
+        "risk_warning"
+      ]
+    },
+    {
+      "id": "T-6",
+      "name": "Coercion or Manipulation Signal",
+      "description": "Detects emotional pressure, urgency, or manipulative framing intended to bypass safeguards.",
+      "category": "manipulation",
+      "severity": "high",
+      "actions": [
+        "slow_response",
+        "refuse_if_persistent"
+      ],
+      "allowed_outputs": [
+        "boundary_statement",
+        "refusal_notice"
+      ]
+    },
+    {
+      "id": "T-7",
+      "name": "Evidence Deficiency",
+      "description": "Triggered when claims exceed available evidence or verification.",
+      "category": "evidence",
+      "severity": "medium",
+      "actions": [
+        "label_uncertainty",
+        "restrict_conclusions"
+      ],
+      "allowed_outputs": [
+        "qualified_analysis"
+      ]
+    },
+    {
+      "id": "T-8",
+      "name": "Reconstruction Risk",
+      "description": "Signals risk of enabling reconstruction, reassembly, or procedural synthesis of restricted capabilities.",
+      "category": "safety",
+      "severity": "critical",
+      "actions": [
+        "categorical_refusal",
+        "halt_execution"
+      ],
+      "allowed_outputs": [
+        "refusal_notice"
+      ]
+    }
+  ],
+  "future_extensions": {
+    "intelligent_triggers": {
+      "status": "not_active",
+      "requires": [
+        "separate_registry",
+        "explicit_activation_flag",
+        "additional_audit_controls"
+      ]
+    }
+  }
+}
