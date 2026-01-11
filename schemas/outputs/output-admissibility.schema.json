@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "title": "SkillSpring Output Admissibility Schema",
+  "description": "Defines the mandatory conditions under which execution artifacts may be released as user-visible outputs.",
+  "type": "object",
+  "required": [
+    "admissibility_status",
+    "evidence_status",
+    "authority_check",
+    "enforcement_check"
+  ],
+  "properties": {
+    "admissibility_status": {
+      "type": "string",
+      "enum": ["admissible", "refused", "halted"]
+    },
+    "evidence_status": {
+      "type": "object",
+      "required": ["classification"],
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["verified", "estimated", "assumed", "unknown"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "authority_check": {
+      "type": "object",
+      "required": ["within_bounds"],
+      "properties": {
+        "within_bounds": {
+          "type": "boolean"
+        },
+        "violations": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "enforcement_check": {
+      "type": "object",
+      "required": ["passed"],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "triggered_rules": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
