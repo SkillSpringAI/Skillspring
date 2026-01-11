@@ -1,48 +1,50 @@
-import { ControlContext } from "./control-plane/control-plane.types";
-import { controlGate } from "./control-plane/control-gate";
-import { execute } from "./execution-plane/execute";
-import { checkAdmissibility } from "./output-plane/admissibility-gate";
+import type { PipelineInput, PipelineOutput } from "./types.ts";
+import { classify, makeTraceId } from "./controlPlane.ts";
+import { executeStub } from "./executionPlane.ts";
+import { assertAdmissible } from "./outputGate.ts";
 
-/**
- * Pipeline Entry
- * Purpose: Enforce end-to-end governance.
- * This is the ONLY permitted execution path.
- */
-export function runPipeline(context: ControlContext): unknown {
-  // 1) Control Plane gate
-  const decision = controlGate(context);
+export async function runGovernedPipeline(
+  input: PipelineInput
+): Promise<PipelineOutput> {
+  const trace_id = makeTraceId(input.user_input);
 
-  // Clarify or refuse stops everything
-  if ("status" in decision) {
-    return decision;
-  }
+  const ctx = classify(input);
 
-  // 2) Execution (stubbed)
-  let executionArtifact: unknown;
-  try {
-    executionArtifact = execute(decision);
-  } catch (e) {
-    executionArtifact = {
-      admissibility_status: "refused",
-      evidence_status: { classification: "unknown" },
-      authority_check: { within_bounds: true, violations: [] },
-      enforcement_check: {
-        passed: false,
-        triggered_rules: ["execution-not-implemented"]
+  // Hard refusal triggers (fail-closed)
+  if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
+    return assertAdmissible({
+      ok: false,
+      mode: ctx.mode,
+      trace_id,
+      refusal: {
+        code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
+        message:
+          "Request appears dual-use or reconstruction-risk. Refusing under governance policy."
       }
-    };
+    });
   }
 
-  // 3) Output Plane admissibility gate
-  const admissibility = checkAdmissibility(executionArtifact);
+  // Control → Execution handshake (stub)
+  const exec = await executeStub(ctx);
 
-  if (admissibility.status !== "admissible") {
-    return {
-      status: "refused",
-      reason: admissibility.reason
-    };
-  }
+  // Safe, non-capability output
+  const out: PipelineOutput = {
+    ok: true,
+    mode: ctx.mode,
+    trace_id,
+    evidence: [
+      { item: "User input content", status: "PROVIDED" },
+      { item: "Jurisdiction", status: "UNKNOWN" },
+      { item: "Domain classification", status: "ASSUMED" }
+    ],
+    response: {
+      type: "SAFE_STUB",
+      text:
+        `Governance pipeline OK. ${exec.note}\n` +
+        `No agentic execution is implemented by design.`
+    }
+  };
 
-  // 4) Final output (placeholder)
-  return executionArtifact;
+  return assertAdmissible(out);
 }
+

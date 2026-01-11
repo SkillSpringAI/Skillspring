@@ -1,0 +1,50 @@
+export type Mode = "DEFAULT" | "GOVERNANCE" | "ARCHITECT";
+
+export type PipelineInput = {
+  user_input: string;
+  meta?: {
+    source?: string;
+    timestamp_utc?: string;
+  };
+};
+
+export type ClassifiedContext = {
+  mode: Mode;
+  domain_hints: string[];
+  jurisdiction?: {
+    guess?: string;
+    confidence: number;
+  };
+  risk: {
+    rights_impact: boolean;
+    dual_use: boolean;
+    reconstruction_risk: boolean;
+    confidence: number;
+  };
+};
+
+export type ExecutionArtifact = {
+  kind: "STUB";
+  note: string;
+};
+
+export type PipelineOutput =
+  | {
+      ok: true;
+      mode: Mode;
+      trace_id: string;
+      evidence: Array<{ item: string; status: string }>;
+      response: {
+        type: "SAFE_STUB";
+        text: string;
+      };
+    }
+  | {
+      ok: false;
+      mode: Mode;
+      trace_id: string;
+      refusal: {
+        code: string;
+        message: string;
+      };
+    };

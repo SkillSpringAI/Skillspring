@@ -1,0 +1,58 @@
+{
+  "$id": "skillspring.output.v1",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["ok", "mode", "trace_id", "evidence", "response"],
+      "properties": {
+        "ok": { "const": true },
+        "mode": { "enum": ["DEFAULT", "GOVERNANCE", "ARCHITECT"] },
+        "trace_id": { "type": "string", "minLength": 8 },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item", "status"],
+            "properties": {
+              "item": { "type": "string" },
+              "status": {
+                "enum": ["PROVIDED", "ASSUMED", "UNKNOWN", "ESTIMATE"]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "response": {
+          "type": "object",
+          "required": ["type", "text"],
+          "properties": {
+            "type": { "const": "SAFE_STUB" },
+            "text": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["ok", "mode", "trace_id", "refusal"],
+      "properties": {
+        "ok": { "const": false },
+        "mode": { "enum": ["DEFAULT", "GOVERNANCE", "ARCHITECT"] },
+        "trace_id": { "type": "string", "minLength": 8 },
+        "refusal": {
+          "type": "object",
+          "required": ["code", "message"],
+          "properties": {
+            "code": { "type": "string" },
+            "message": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}
