@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "canonical",
-  "description": "Registry of diagnostic checks for SkillSpring governance, datasets, and enforcement expectations.",
+  "description": "Registry of diagnostic checks for SkillSpring governance, datasets, enforcement, and pipeline behavior.",
   "diagnostics": [
     {
       "id": "DIAG-01",
@@ -26,6 +26,12 @@
       "name": "Output Admissibility Schema Validation",
       "scope": "schemas/outputs",
       "purpose": "Ensure output admissibility schema exists and forbids additional properties."
+    },
+    {
+      "id": "DIAG-05",
+      "name": "Pipeline Fail-Closed Behavior",
+      "scope": "runtime/pipeline",
+      "purpose": "Ensure end-to-end pipeline enforces control, execution, and output gating without bypass."
     }
   ]
 }
