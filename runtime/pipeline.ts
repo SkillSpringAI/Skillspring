@@ -2,74 +2,29 @@
 import { classify, makeTraceId } from "./controlPlane";
 import { executeStub } from "./executionPlane";
 import { assertAdmissible } from "./outputGate";
-import { readFileSync } from "node:fs";
 
-function validatePipelineInput(input: any): { ok: true } | { ok: false; code: string; message: string } {
-  if (!input || typeof input !== "object") {
-    return { ok: false, code: "REFUSE-INVALID-INPUT", message: "PipelineInput must be an object." };
-  }
+const DATASET_VERSION_NOTE = "datasets: dual-use=v1; reconstruction=v1";
 
-  if (typeof input.user_input !== "string" || input.user_input.trim().length === 0) {
-    return {
-      ok: false,
-      code: "REFUSE-INVALID-INPUT",
-      message: "PipelineInput.user_input must be a non-empty string."
-    };
-  }
-
-  if ("meta" in input && input.meta !== undefined && (typeof input.meta !== "object" || input.meta === null)) {
-    return { ok: false, code: "REFUSE-INVALID-INPUT", message: "PipelineInput.meta must be an object if provided." };
-  }
-
-  if (input.meta?.source !== undefined && typeof input.meta.source !== "string") {
-    return { ok: false, code: "REFUSE-INVALID-INPUT", message: "PipelineInput.meta.source must be a string if provided." };
-  }
-  if (input.meta?.timestamp_utc !== undefined && typeof input.meta.timestamp_utc !== "string") {
-    return {
-      ok: false,
-      code: "REFUSE-INVALID-INPUT",
-      message: "PipelineInput.meta.timestamp_utc must be a string if provided."
-    };
-  }
-
-  return { ok: true };
-}
-
-function readDatasetVersion(path: string): string {
-  try {
-    const obj = JSON.parse(readFileSync(path, "utf8"));
-    const v = obj?.version;
-    return typeof v === "string" && v.trim().length > 0 ? v : "UNKNOWN";
-  } catch {
-    return "UNREADABLE";
-  }
-}
-
-function datasetVersionNote(): string {
-  const dual = readDatasetVersion("datasets/risk-patterns/dual-use-patterns.json");
-  const recon = readDatasetVersion("datasets/risk-patterns/reconstruction-vectors.json");
-  return `datasets: dual-use=${dual}; reconstruction=${recon}`;
-}
-
-export async function runGovernedPipeline(input: PipelineInput): Promise<PipelineOutput> {
-  const v = validatePipelineInput(input as any);
-  const trace_id = makeTraceId((input as any)?.user_input ?? "");
-  const version_note = datasetVersionNote();
-
-  if (!v.ok) {
+export async function runGovernedPipeline(
+  input: PipelineInput
+): Promise<PipelineOutput> {
+  if (!input || typeof input.user_input !== "string" || input.user_input.trim() === "") {
     return assertAdmissible({
       ok: false,
       mode: "GOVERNANCE",
-      trace_id,
+      trace_id: "NO_TRACE_ID",
       refusal: {
-        code: v.code,
-        message: `${v.message} (${version_note})`
+        code: "REFUSE-INVALID-INPUT",
+        message: "Invalid or missing user_input. (" + DATASET_VERSION_NOTE + ")"
       }
     });
   }
 
+  const trace_id = makeTraceId(input.user_input);
   const ctx = classify(input);
+  const mode_reason_note = `mode_reason=${ctx.mode_reason}`;
 
+  // Hard refusal triggers (fail-closed)
   if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
     return assertAdmissible({
       ok: false,
@@ -77,11 +32,13 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       trace_id,
       refusal: {
         code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-        message: `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${version_note})`
+        message:
+          `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`
       }
     });
   }
 
+  // Control → Execution handshake (stub)
   const exec = await executeStub(ctx);
 
   const out: PipelineOutput = {
@@ -92,14 +49,16 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       { item: "User input content", status: "PROVIDED" },
       { item: "Jurisdiction", status: "UNKNOWN" },
       { item: "Domain classification", status: "ASSUMED" },
-      { item: `Dataset versions (${version_note})`, status: "PROVIDED" }
+      { item: `Mode reason (${mode_reason_note})`, status: "ASSUMED" },
+      { item: `Dataset versions (${DATASET_VERSION_NOTE})`, status: "PROVIDED" }
     ],
     response: {
       type: "SAFE_STUB",
-      text: `Governance pipeline OK. ${exec.note}\nNo agentic execution is implemented by design.`
+      text:
+        `Governance pipeline OK. ${exec.note}\n` +
+        `No agentic execution is implemented by design.`
     }
   };
 
   return assertAdmissible(out);
 }
-

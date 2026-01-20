@@ -4,6 +4,7 @@ import { pipelineFailClosedDiagnostics } from "./pipeline-tests";
 import { checkOutputInvariants } from "./output-invariants";
 import { checkCapabilityGuard } from "./capability-guard-tests";
 import { checkDatasetVersionBinding } from "./dataset-version-binding";
+import { checkModeReasonTransparency } from "./mode-reason-tests";
 
 async function main() {
   checkDatasetIntegrity();
@@ -12,7 +13,8 @@ async function main() {
   await checkOutputInvariants();
   checkCapabilityGuard();
   await checkDatasetVersionBinding();
-  console.log("DIAG: PASS");
+  await checkModeReasonTransparency();
+console.log("DIAG: PASS");
 }
 
 main().catch((e) => {
