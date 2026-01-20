@@ -18,19 +18,75 @@ function safeTraceId(out: any): string {
   return typeof t === "string" && t.length > 0 ? t : "NO_TRACE_ID";
 }
 
+// Simple capability-leak guard for ok:true outputs.
+// This is intentionally conservative and buyer/auditor-friendly.
+function detectCapabilityLeak(text: string): string | null {
+  const t = text.toLowerCase();
+
+  const banned = [
+    // filesystem / commands
+    "rm -rf",
+    "sudo",
+    "chmod ",
+    "chown ",
+    "powershell",
+    "cmd.exe",
+    "bash",
+    "curl ",
+    "wget ",
+    "invoke-webrequest",
+    "set-content",
+    "remove-item",
+    "start-process",
+    // network / exfil indicators
+    "http://",
+    "https://",
+    "upload",
+    "exfiltrate",
+    "send to",
+    // code execution hints
+    "eval(",
+    "child_process",
+    "exec(",
+    "spawn(",
+    "process.exit"
+  ];
+
+  const hit = banned.find((s) => t.includes(s));
+  return hit ?? null;
+}
+
+function refusal(out: any, code: string, message: string): PipelineOutput {
+  return {
+    ok: false,
+    mode: safeMode(out),
+    trace_id: safeTraceId(out),
+    refusal: { code, message }
+  };
+}
+
 export function assertAdmissible(out: PipelineOutput): PipelineOutput {
+  // 1) Schema validation
   const ok = validate(out as any);
   if (!ok) {
     const details = JSON.stringify(validate.errors ?? [], null, 2);
-    return {
-      ok: false,
-      mode: safeMode(out),
-      trace_id: safeTraceId(out),
-      refusal: {
-        code: "REFUSE-OUTPUT-NOT-ADMISSIBLE",
-        message: "Output failed admissibility schema validation. " + details
-      }
-    };
+    return refusal(out, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
   }
+
+  // 2) Capability leak guard (only for ok:true textual responses)
+  if (out.ok === true) {
+    const text = out.response?.text ?? "";
+    if (typeof text === "string" && text.length > 0) {
+      const hit = detectCapabilityLeak(text);
+      if (hit) {
+        return refusal(
+          out,
+          "REFUSE-CAPABILITY-LEAK",
+          `Output contained capability-like language ("${hit}"). Refusing under output policy.`
+        );
+      }
+    }
+  }
+
   return out;
 }
