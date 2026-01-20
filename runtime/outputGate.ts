@@ -19,24 +19,31 @@ function safeTraceId(out: any): string {
 }
 
 function extractDatasetNote(out: any): string | null {
-  // Prefer the "Dataset versions" evidence item if present
   const ev = out?.evidence;
   if (Array.isArray(ev)) {
     const hit = ev.find((e: any) => typeof e?.item === "string" && String(e.item).startsWith("Dataset versions ("));
     if (hit?.item) return String(hit.item);
   }
-  // Otherwise try to preserve an existing refusal message note
   const msg = out?.refusal?.message;
   if (typeof msg === "string" && msg.includes("datasets: dual-use=") && msg.includes("reconstruction=")) return msg;
   return null;
 }
 
-// Simple capability-leak guard for ok:true outputs.
-// Intentionally conservative and auditor-friendly.
-function detectCapabilityLeak(text: string): string | null {
-  const t = text.toLowerCase();
+function normalizeForScan(text: string): { loose: string; tight: string } {
+  const loose = text
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  const banned = [
+  const tight = loose.replace(/[^a-z0-9]+/g, "");
+  return { loose, tight };
+}
+
+function detectCapabilityLeak(text: string): string | null {
+  const { loose, tight } = normalizeForScan(text);
+
+  const bannedLoose = [
     "rm -rf",
     "sudo",
     "chmod ",
@@ -62,8 +69,26 @@ function detectCapabilityLeak(text: string): string | null {
     "process.exit"
   ];
 
-  const hit = banned.find((s) => t.includes(s));
-  return hit ?? null;
+  const bannedTight = [
+    "powershell",
+    "cmdexe",
+    "rmrf",
+    "invokewebrequest",
+    "removeitem",
+    "startprocess",
+    "childprocess",
+    "processenv",
+    "wget",
+    "curl"
+  ];
+
+  const hitLoose = bannedLoose.find((s) => loose.includes(s));
+  if (hitLoose) return hitLoose;
+
+  const hitTight = bannedTight.find((s) => tight.includes(s));
+  if (hitTight) return hitTight;
+
+  return null;
 }
 
 function refusal(out: any, code: string, message: string): PipelineOutput {
@@ -76,14 +101,12 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
 }
 
 export function assertAdmissible(out: PipelineOutput): PipelineOutput {
-  // 1) Schema validation
   const ok = validate(out as any);
   if (!ok) {
     const details = JSON.stringify(validate.errors ?? [], null, 2);
     return refusal(out, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
   }
 
-  // 2) Capability leak guard (only for ok:true textual responses)
   if (out.ok === true) {
     const text = out.response?.text ?? "";
     if (typeof text === "string" && text.length > 0) {
@@ -102,4 +125,3 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
 
   return out;
 }
-
