@@ -6,18 +6,34 @@ function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
 
-function hasKeyword(input: string, words: string[]): boolean {
-  const t = input.toLowerCase();
-  return words.some((w) => t.includes(w));
+/**
+ * Deterministic input normalization:
+ * - Unicode NFKC
+ * - collapse whitespace
+ * - trim
+ * - lowercase
+ */
+function normalizeUserInput(raw: unknown): string {
+  const s = String(raw ?? "");
+  return s
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
-export function makeTraceId(seed: string): string {
-  const h = crypto.createHash("sha256").update(seed).digest("hex");
+function hasKeyword(normalizedInput: string, words: string[]): boolean {
+  return words.some((w) => normalizedInput.includes(w));
+}
+
+export function makeTraceId(seed: unknown): string {
+  const norm = normalizeUserInput(seed);
+  const h = crypto.createHash("sha256").update(norm).digest("hex");
   return h.slice(0, 24);
 }
 
 export function classify(input: PipelineInput): ClassifiedContext {
-  const text = input.user_input;
+  const text = normalizeUserInput(input.user_input);
 
   const rightsImpact = hasKeyword(text, [
     "medical",
@@ -43,19 +59,33 @@ export function classify(input: PipelineInput): ClassifiedContext {
   ]);
 
   const reconstructionRisk = hasKeyword(text, [
+    "reconstruct",
     "recreate",
     "reverse engineer",
     "exact prompt",
+    "partial details",
     "leak",
     "private key",
     "credentials"
   ]);
 
+  // Risk dominance: reconstruction implies dual-use
+  const dualUseFinal = dualUse || reconstructionRisk;
+
   let mode: Mode = "DEFAULT";
-  if (rightsImpact || dualUse || reconstructionRisk) mode = "GOVERNANCE";
+  if (rightsImpact || dualUseFinal || reconstructionRisk) mode = "GOVERNANCE";
   if (hasKeyword(text, ["system architect", "constitution", "invariant"])) {
     mode = "ARCHITECT";
   }
+
+  const reason_code =
+    reconstructionRisk
+      ? "RECONSTRUCTION_RISK"
+      : dualUseFinal
+      ? "DUAL_USE"
+      : rightsImpact
+      ? "RIGHTS_IMPACT"
+      : "NONE";
 
   return {
     mode,
@@ -63,10 +93,11 @@ export function classify(input: PipelineInput): ClassifiedContext {
     jurisdiction: { confidence: 0 },
     risk: {
       rights_impact: rightsImpact,
-      dual_use: dualUse,
+      dual_use: dualUseFinal,
       reconstruction_risk: reconstructionRisk,
+      reason_code,
       confidence: clamp01(
-        (Number(rightsImpact) + Number(dualUse) + Number(reconstructionRisk)) / 3
+        (Number(rightsImpact) + Number(dualUseFinal) + Number(reconstructionRisk)) / 3
       )
     }
   };

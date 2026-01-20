@@ -1,3 +1,9 @@
+﻿export type RiskReasonCode =
+  | "RECONSTRUCTION_RISK"
+  | "DUAL_USE"
+  | "RIGHTS_IMPACT"
+  | "NONE";
+
 export type Mode = "DEFAULT" | "GOVERNANCE" | "ARCHITECT";
 
 export type PipelineInput = {
@@ -19,6 +25,7 @@ export type ClassifiedContext = {
     rights_impact: boolean;
     dual_use: boolean;
     reconstruction_risk: boolean;
+    reason_code: RiskReasonCode;
     confidence: number;
   };
 };
