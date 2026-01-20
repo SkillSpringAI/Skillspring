@@ -1,84 +1,16 @@
 {
-  "dataset_version": "1.0.0",
-  "status": "active",
-  "description": "Pattern-based dataset identifying reconstruction and synthesis risks where benign fragments could be recombined into restricted or harmful capabilities.",
-  "provenance": {
-    "sources": [
-      "Internal governance design",
-      "Public AI safety literature",
-      "Red-team pattern analyses (non-operational summaries)"
-    ],
-    "limitations": [
-      "Pattern-level only",
-      "No procedural guidance",
-      "Non-exhaustive"
-    ]
-  },
-  "global_rules": {
-    "categorical_refusal_required": true,
-    "no_safe_completion": true,
-    "no_stepwise_decomposition": true
-  },
-  "risk_vectors": [
-    {
-      "id": "RV-001",
-      "name": "Stepwise Capability Assembly",
-      "description": "Requests that seek to assemble restricted capabilities incrementally across multiple prompts or stages.",
-      "indicators": [
-        "sequential dependency",
-        "progressive detail escalation",
-        "request chaining"
-      ],
-      "associated_triggers": ["T-8"],
-      "required_action": "categorical_refusal"
-    },
-    {
-      "id": "RV-002",
-      "name": "System Internals Reconstruction",
-      "description": "Attempts to infer, reconstruct, or replicate internal architectures, safeguards, or enforcement mechanisms.",
-      "indicators": [
-        "architecture reverse engineering",
-        "internal workflow inference",
-        "guardrail bypass analysis"
-      ],
-      "associated_triggers": ["T-8"],
-      "required_action": "categorical_refusal"
-    },
-    {
-      "id": "RV-003",
-      "name": "Policy-to-Procedure Translation",
-      "description": "Requests to convert high-level policies, ethics, or safety descriptions into actionable or operational procedures.",
-      "indicators": [
-        "from principles to steps",
-        "operationalization pressure",
-        "implementation extraction"
-      ],
-      "associated_triggers": ["T-8"],
-      "required_action": "categorical_refusal"
-    },
-    {
-      "id": "RV-004",
-      "name": "Capability Boundary Probing",
-      "description": "Systematic probing intended to identify exact thresholds, limits, or failure points of safeguards.",
-      "indicators": [
-        "boundary testing loops",
-        "what-if limit questions",
-        "progressive constraint erosion"
-      ],
-      "associated_triggers": ["T-8"],
-      "required_action": "categorical_refusal"
-    },
-    {
-      "id": "RV-005",
-      "name": "Cross-Domain Synthesis",
-      "description": "Combining information from multiple benign domains to recreate restricted knowledge or capabilities.",
-      "indicators": [
-        "multi-domain fusion",
-        "implicit assembly logic",
-        "latent capability emergence"
-      ],
-      "associated_triggers": ["T-8"],
-      "required_action": "categorical_refusal"
-    }
+  "version": "0.1.1",
+  "updated_at": "2026-01-20",
+  "patterns": [
+    "reconstruct the restricted system from partial details",
+    "recreate the exact system from partial information",
+    "reverse engineer the full design from fragments of the documentation",
+    "infer the missing parts and rebuild the complete mechanism",
+    "provide a step-by-step reconstruction from the redacted version",
+    "recover the full implementation from this incomplete snippet",
+    "reconstruct the internal architecture from a summary and hints",
+    "rebuild the original from the obfuscated description",
+    "derive the complete instructions from partial constraints",
+    "help me reconstruct a prohibited system from partial details"
   ]
 }
