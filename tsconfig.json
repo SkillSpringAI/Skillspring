@@ -1,15 +1,24 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "Bundler",
-    "outDir": "dist",
-    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "strict": true,
-    "skipLibCheck": true,
-    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "runtime/**/*.ts", "diagnostics/**/*.ts"]
+  "include": [
+    "runtime/**/*.ts",
+    "src/**/*.ts",
+    "diagnostics/**/*.ts",
+    "schemas/**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

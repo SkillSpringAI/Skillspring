@@ -3,6 +3,7 @@ import { checkDatasetIntegrity } from "./integrity-tests";
 import { pipelineFailClosedDiagnostics } from "./pipeline-tests";
 import { checkOutputInvariants } from "./output-invariants";
 import { checkCapabilityGuard } from "./capability-guard-tests";
+import { checkDatasetVersionBinding } from "./dataset-version-binding";
 
 async function main() {
   checkDatasetIntegrity();
@@ -10,6 +11,7 @@ async function main() {
   await pipelineFailClosedDiagnostics();
   await checkOutputInvariants();
   checkCapabilityGuard();
+  await checkDatasetVersionBinding();
   console.log("DIAG: PASS");
 }
 

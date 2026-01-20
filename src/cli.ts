@@ -1,4 +1,4 @@
-import { runGovernedPipeline } from "../runtime/pipeline.ts";
+﻿import { runGovernedPipeline } from "../runtime/pipeline";
 
 async function main() {
   const input = process.argv.slice(2).join(" ").trim();
@@ -35,3 +35,4 @@ main().catch((err) => {
   );
   process.exit(1);
 });
+
