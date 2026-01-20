@@ -18,13 +18,25 @@ function safeTraceId(out: any): string {
   return typeof t === "string" && t.length > 0 ? t : "NO_TRACE_ID";
 }
 
+function extractDatasetNote(out: any): string | null {
+  // Prefer the "Dataset versions" evidence item if present
+  const ev = out?.evidence;
+  if (Array.isArray(ev)) {
+    const hit = ev.find((e: any) => typeof e?.item === "string" && String(e.item).startsWith("Dataset versions ("));
+    if (hit?.item) return String(hit.item);
+  }
+  // Otherwise try to preserve an existing refusal message note
+  const msg = out?.refusal?.message;
+  if (typeof msg === "string" && msg.includes("datasets: dual-use=") && msg.includes("reconstruction=")) return msg;
+  return null;
+}
+
 // Simple capability-leak guard for ok:true outputs.
-// This is intentionally conservative and buyer/auditor-friendly.
+// Intentionally conservative and auditor-friendly.
 function detectCapabilityLeak(text: string): string | null {
   const t = text.toLowerCase();
 
   const banned = [
-    // filesystem / commands
     "rm -rf",
     "sudo",
     "chmod ",
@@ -38,13 +50,11 @@ function detectCapabilityLeak(text: string): string | null {
     "set-content",
     "remove-item",
     "start-process",
-    // network / exfil indicators
     "http://",
     "https://",
     "upload",
     "exfiltrate",
     "send to",
-    // code execution hints
     "eval(",
     "child_process",
     "exec(",
@@ -79,10 +89,12 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     if (typeof text === "string" && text.length > 0) {
       const hit = detectCapabilityLeak(text);
       if (hit) {
+        const ds = extractDatasetNote(out);
+        const suffix = ds ? ` (${ds})` : "";
         return refusal(
           out,
           "REFUSE-CAPABILITY-LEAK",
-          `Output contained capability-like language ("${hit}"). Refusing under output policy.`
+          `Output contained capability-like language ("${hit}"). Refusing under output policy.${suffix}`
         );
       }
     }
@@ -90,3 +102,4 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
 
   return out;
 }
+
