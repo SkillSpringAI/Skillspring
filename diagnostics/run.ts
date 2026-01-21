@@ -1,27 +1,36 @@
-﻿import { checkEnforcementExpectations } from "./enforcement-tests";
+import { checkEnforcementExpectations } from "./enforcement-tests";
 import { checkDatasetIntegrity } from "./integrity-tests";
 import { pipelineFailClosedDiagnostics } from "./pipeline-tests";
 import { checkOutputInvariants } from "./output-invariants";
 import { checkCapabilityGuard } from "./capability-guard-tests";
 import { checkDatasetVersionBinding } from "./dataset-version-binding";
 import { checkNegativeCapabilities } from "./negative-capability-tests";
-import { checkModeReasonTransparency } from "./mode-reason-tests";
+import { checkDriftSnapshots } from "./drift-snapshot";
 
-async function main() {
-  checkDatasetIntegrity();
-  await checkEnforcementExpectations();
-  await pipelineFailClosedDiagnostics();
-  await checkOutputInvariants();
-  checkCapabilityGuard();
- checkNegativeCapabilities();
- await checkDatasetVersionBinding();
-  await checkModeReasonTransparency();
-console.log("DIAG: PASS");
+async function runStep(name: string, fn: () => any | Promise<any>) {
+  try {
+    await fn();
+    console.log(`DIAG ${name}: PASS`);
+  } catch (err: any) {
+    console.error(`DIAG ${name}: FAIL`);
+    throw err;
+  }
 }
 
-main().catch((e) => {
-  console.error("DIAG: FAIL");
-  console.error(e);
-  process.exit(1);
-});
+async function main() {
+  await runStep("integrity", () => checkDatasetIntegrity());
+  await runStep("enforcement", () => checkEnforcementExpectations());
+  await runStep("pipeline", () => pipelineFailClosedDiagnostics());
+  await runStep("output-invariants", () => checkOutputInvariants());
+  await runStep("capability-guard", () => checkCapabilityGuard());
+  await runStep("dataset-version-binding", () => checkDatasetVersionBinding());
+  await runStep("negative-capabilities", () => checkNegativeCapabilities());
+  await runStep("drift-snapshot", () => checkDriftSnapshots());
 
+  console.log("DIAG: PASS");
+}
+
+main().catch((err) => {
+  console.error("DIAG: FAIL");
+  throw err;
+});
