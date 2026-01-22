@@ -26,6 +26,7 @@ export function makeTraceId(userInput: string): string {
 }
 
 export function classify(input: PipelineInput): ClassifiedContext {
+  const trigger_hits: TriggerHit[] = [];
   const text = input?.user_input ?? "";
 
   const rightsImpact = hasKeyword(text, ["legal advice", "visa appeal", "medical advice", "court", "lawsuit"]);
@@ -39,7 +40,11 @@ export function classify(input: PipelineInput): ClassifiedContext {
     "leak"
   ]);
 
-  const dualUse = hasKeyword(text, [
+  
+  if (reconstructionRisk) {
+    trigger_hits.push({ dataset: "risk-patterns/reconstruction-vectors", id: "RECONSTRUCTION_RISK", match: "keyword" });
+  }
+const dualUse = hasKeyword(text, [
     "weapon",
     "explosive",
     "malware",
@@ -53,7 +58,11 @@ export function classify(input: PipelineInput): ClassifiedContext {
 
   const dualUseFinal = dualUse || reconstructionRisk;
 
-  let mode: Mode = "DEFAULT";
+  
+  if (dualUseFinal) {
+    trigger_hits.push({ dataset: "risk-patterns/dual-use-patterns", id: "DUAL_USE", match: "keyword" });
+  }
+let mode: Mode = "DEFAULT";
   if (rightsImpact || dualUseFinal || reconstructionRisk) mode = "GOVERNANCE";
   if (architectHint) mode = "ARCHITECT";
 
@@ -67,9 +76,6 @@ export function classify(input: PipelineInput): ClassifiedContext {
           : rightsImpact
             ? "RIGHTS_IMPACT"
             : "DEFAULT_SAFE";
-
-  const trigger_hits: TriggerHit[] = [];
-
   return {
     mode,
     mode_reason: reason_code,
