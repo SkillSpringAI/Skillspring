@@ -13,6 +13,31 @@ export type ModeReasonCode =
 
 export type Mode = "DEFAULT" | "GOVERNANCE" | "ARCHITECT";
 
+export type EvidenceStatus = "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE";
+
+export type PolicyDecision = "ALLOW" | "REFUSE";
+
+export type PolicyEvidenceStatus = "KNOWN" | "UNKNOWN";
+
+export type TriggerHit = {
+  dataset: string;
+  id: string;
+  match?: string;
+};
+
+export type PolicyBlock = {
+  decision: PolicyDecision;
+  decision_code: string;
+  mode_reason: ModeReasonCode;
+  dataset_versions: {
+    dual_use: string;
+    reconstruction: string;
+    [k: string]: string;
+  };
+  trigger_hits: TriggerHit[];
+  evidence_status: PolicyEvidenceStatus;
+};
+
 export type PipelineInput = {
   user_input: string;
   meta?: {
@@ -25,6 +50,7 @@ export type ClassifiedContext = {
   mode: Mode;
   mode_reason: ModeReasonCode;
   domain_hints: string[];
+  trigger_hits: TriggerHit[];
   jurisdiction?: {
     guess?: string;
     confidence: number;
@@ -47,8 +73,10 @@ export type PipelineOutput =
   | {
       ok: true;
       mode: Mode;
+      mode_reason: ModeReasonCode;
       trace_id: string;
-      evidence: Array<{ item: string; status: "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE" }>;
+      policy: PolicyBlock;
+      evidence: Array<{ item: string; status: EvidenceStatus }>;
       response: {
         type: "SAFE_STUB";
         text: string;
@@ -57,7 +85,9 @@ export type PipelineOutput =
   | {
       ok: false;
       mode: Mode;
+      mode_reason: ModeReasonCode;
       trace_id: string;
+      policy: PolicyBlock;
       refusal: {
         code: string;
         message: string;

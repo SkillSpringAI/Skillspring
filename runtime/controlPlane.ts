@@ -1,57 +1,34 @@
 import crypto from "node:crypto";
-import type { ClassifiedContext, Mode, PipelineInput } from "./types.js";
+import type { PipelineInput, ClassifiedContext, Mode, ModeReasonCode, TriggerHit } from "./types.js";
 
 function clamp01(n: number): number {
-  if (Number.isNaN(n)) return 0;
-  return Math.max(0, Math.min(1, n));
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return n;
 }
 
-function normalizeUserInput(raw: unknown): string {
-  const s = String(raw ?? "");
-  return s
+function normalize(s: string): string {
+  return (s ?? "")
+    .toLowerCase()
     .normalize("NFKC")
     .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
+    .trim();
 }
 
-function hasKeyword(normalizedInput: string, words: string[]): boolean {
-  return words.some((w) => normalizedInput.includes(w));
+function hasKeyword(text: string, needles: string[]): boolean {
+  const t = normalize(text);
+  return needles.some((k) => t.includes(normalize(k)));
 }
 
-export function makeTraceId(seed: unknown): string {
-  const norm = normalizeUserInput(seed);
-  const h = crypto.createHash("sha256").update(norm).digest("hex");
-  return h.slice(0, 24);
+export function makeTraceId(userInput: string): string {
+  const h = crypto.createHash("sha256").update(String(userInput)).digest("hex");
+  return h.slice(0, 16);
 }
 
 export function classify(input: PipelineInput): ClassifiedContext {
-  const text = normalizeUserInput(input.user_input);
+  const text = input?.user_input ?? "";
 
-  const architectHint = hasKeyword(text, ["system architect", "constitution", "invariant"]);
-
-  const rightsImpact = hasKeyword(text, [
-    "medical",
-    "diagnosis",
-    "legal",
-    "visa",
-    "immigration",
-    "child",
-    "criminal",
-    "finance",
-    "loan"
-  ]);
-
-  const dualUse = hasKeyword(text, [
-    "weapon",
-    "explosive",
-    "harm",
-    "poison",
-    "malware",
-    "hack",
-    "bypass",
-    "fraud"
-  ]);
+  const rightsImpact = hasKeyword(text, ["legal advice", "visa appeal", "medical advice", "court", "lawsuit"]);
 
   const reconstructionRisk = hasKeyword(text, [
     "reconstruct",
@@ -59,10 +36,20 @@ export function classify(input: PipelineInput): ClassifiedContext {
     "reverse engineer",
     "exact prompt",
     "partial details",
-    "leak",
-    "private key",
-    "credentials"
+    "leak"
   ]);
+
+  const dualUse = hasKeyword(text, [
+    "weapon",
+    "explosive",
+    "malware",
+    "phishing",
+    "steal",
+    "bypass",
+    "jailbreak"
+  ]);
+
+  const architectHint = hasKeyword(text, ["system architect", "architecture", "governance", "invariant", "constitution"]);
 
   const dualUseFinal = dualUse || reconstructionRisk;
 
@@ -70,31 +57,31 @@ export function classify(input: PipelineInput): ClassifiedContext {
   if (rightsImpact || dualUseFinal || reconstructionRisk) mode = "GOVERNANCE";
   if (architectHint) mode = "ARCHITECT";
 
-  const reason_code =
+  const reason_code: ModeReasonCode =
     architectHint
       ? "ARCHITECT_KEYWORDS"
       : reconstructionRisk
-      ? "RECONSTRUCTION_RISK"
-      : dualUseFinal
-      ? "DUAL_USE"
-      : rightsImpact
-      ? "RIGHTS_IMPACT"
-      : "DEFAULT_SAFE";
+        ? "RECONSTRUCTION_RISK"
+        : dualUseFinal
+          ? "DUAL_USE"
+          : rightsImpact
+            ? "RIGHTS_IMPACT"
+            : "DEFAULT_SAFE";
+
+  const trigger_hits: TriggerHit[] = [];
 
   return {
     mode,
     mode_reason: reason_code,
     domain_hints: [],
+    trigger_hits,
     jurisdiction: { confidence: 0 },
     risk: {
       rights_impact: rightsImpact,
       dual_use: dualUseFinal,
       reconstruction_risk: reconstructionRisk,
-      reason_code:
-        reconstructionRisk ? "RECONSTRUCTION_RISK" : dualUseFinal ? "DUAL_USE" : rightsImpact ? "RIGHTS_IMPACT" : "NONE",
-      confidence: clamp01(
-        (Number(rightsImpact) + Number(dualUseFinal) + Number(reconstructionRisk)) / 3
-      )
+      reason_code: reconstructionRisk ? "RECONSTRUCTION_RISK" : dualUseFinal ? "DUAL_USE" : rightsImpact ? "RIGHTS_IMPACT" : "NONE",
+      confidence: clamp01((Number(rightsImpact) + Number(dualUseFinal) + Number(reconstructionRisk)) / 3)
     }
   };
 }
