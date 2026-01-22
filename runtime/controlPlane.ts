@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { ClassifiedContext, Mode, PipelineInput } from "./types";
+import type { ClassifiedContext, Mode, PipelineInput } from "./types.js";
 
 function clamp01(n: number): number {
   if (Number.isNaN(n)) return 0;

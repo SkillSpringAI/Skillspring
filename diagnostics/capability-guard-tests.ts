@@ -1,5 +1,5 @@
-﻿import { assertAdmissible } from "../runtime/outputGate";
-import type { PipelineOutput } from "../runtime/types";
+﻿import { assertAdmissible } from "../runtime/outputGate.js";
+import type { PipelineOutput } from "../runtime/types.js";
 
 function must(cond: any, msg: string) {
   if (!cond) throw new Error(msg);

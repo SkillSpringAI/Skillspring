@@ -1,7 +1,7 @@
 ﻿import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "../schemas/output.schema.json";
-import type { PipelineOutput, Mode } from "./types";
+import type { PipelineOutput, Mode } from "./types.js";
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);

@@ -1,7 +1,7 @@
 ﻿import { readFileSync } from "node:fs";
-import { classify } from "../runtime/controlPlane";
-import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineInput, PipelineOutput } from "../runtime/types";
+import { classify } from "../runtime/controlPlane.js";
+import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineInput, PipelineOutput } from "../runtime/types.js";
 
 function must(cond: any, msg: string) {
   if (!cond) throw new Error(msg);

@@ -1,8 +1,8 @@
-import { ControlContext, ControlDecision } from "./control-plane.types";
-import { routeMode } from "./mode-router";
-import { resolveJurisdiction } from "./jurisdiction-resolver";
-import { checkAuthority } from "./authority-check";
-import { ExecutionPlan } from "../execution-plane/execution-plan.types";
+import { ControlContext, ControlDecision } from "./control-plane.types.js";
+import { routeMode } from "./mode-router.js";
+import { resolveJurisdiction } from "./jurisdiction-resolver.js";
+import { checkAuthority } from "./authority-check.js";
+import { ExecutionPlan } from "../execution-plane/execution-plan.types.js";
 
 /**
  * Control Gate

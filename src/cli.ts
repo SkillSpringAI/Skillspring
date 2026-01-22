@@ -1,4 +1,4 @@
-﻿import { runGovernedPipeline } from "../runtime/pipeline";
+﻿import { runGovernedPipeline } from "../runtime/pipeline.js";
 
 async function main() {
   const input = process.argv.slice(2).join(" ").trim();

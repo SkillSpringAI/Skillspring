@@ -1,4 +1,4 @@
-import { ExecutionPlan } from "./execution-plan.types";
+import { ExecutionPlan } from "./execution-plan.types.js";
 
 /**
  * Execution Entry

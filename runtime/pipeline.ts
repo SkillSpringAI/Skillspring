@@ -1,7 +1,7 @@
-﻿import type { PipelineInput, PipelineOutput } from "./types";
-import { classify, makeTraceId } from "./controlPlane";
-import { executeStub } from "./executionPlane";
-import { assertAdmissible } from "./outputGate";
+﻿import type { PipelineInput, PipelineOutput } from "./types.js";
+import { classify, makeTraceId } from "./controlPlane.js";
+import { executeStub } from "./executionPlane.js";
+import { assertAdmissible } from "./outputGate.js";
 
 const DATASET_VERSION_NOTE = "datasets: dual-use=v1; reconstruction=v1";
 

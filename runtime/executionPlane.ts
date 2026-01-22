@@ -1,4 +1,4 @@
-import type { ClassifiedContext, ExecutionArtifact } from "./types.ts";
+import type { ClassifiedContext, ExecutionArtifact } from "./types.js";
 
 export async function executeStub(
   ctx: ClassifiedContext
