@@ -1,4 +1,4 @@
-import type { PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus } from "./types.js";
+import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
@@ -16,11 +16,11 @@ function evidenceStatusFrom(evidence: Array<{ item: string; status: string }>): 
   return anyUnknown ? "UNKNOWN" : "KNOWN";
 }
 
-function makePolicy(
-  decision: "ALLOW" | "REFUSE",
+function makePolicy(decision: "ALLOW" | "REFUSE",
   decision_code: string,
   mode_reason: ModeReasonCode,
-  evidence?: Array<{ item: string; status: string }>
+  evidence?: Array<{ item: string; status: string }>,
+  trigger_hits?: TriggerHit[]
 ): PolicyBlock {
   const dv = parseDatasetVersions(DATASET_VERSION_NOTE);
   return {
@@ -31,7 +31,7 @@ function makePolicy(
       dual_use: dv.dual_use,
       reconstruction: dv.reconstruction
     },
-    trigger_hits: [],
+    trigger_hits: trigger_hits ?? [],
     evidence_status: evidence ? evidenceStatusFrom(evidence) : "UNKNOWN"
   };
 }
@@ -45,7 +45,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       mode: "GOVERNANCE",
       mode_reason,
       trace_id: "NO_TRACE_ID",
-      policy: makePolicy("REFUSE", "REFUSE_INVALID_INPUT", mode_reason),
+      policy: makePolicy("REFUSE", "REFUSE_INVALID_INPUT", mode_reason, undefined, []),
       refusal: {
         code: "REFUSE-INVALID-INPUT",
         message: "Invalid or missing user_input. (" + DATASET_VERSION_NOTE + ")"
@@ -65,7 +65,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       mode: ctx.mode,
       mode_reason: ctx.mode_reason,
       trace_id,
-      policy: makePolicy("REFUSE", decision_code, ctx.mode_reason),
+      policy: makePolicy("REFUSE", decision_code, ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
       refusal: {
         code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
         message:
@@ -93,7 +93,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     mode: ctx.mode,
     mode_reason: ctx.mode_reason,
     trace_id,
-    policy: makePolicy("ALLOW", decision_code, ctx.mode_reason, evidence),
+    policy: makePolicy("ALLOW", decision_code, ctx.mode_reason, evidence, ctx.trigger_hits ?? []),
     evidence,
     response: {
       type: "SAFE_STUB",
