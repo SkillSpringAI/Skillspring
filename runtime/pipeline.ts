@@ -20,7 +20,7 @@ function makePolicy(decision: "ALLOW" | "REFUSE",
   decision_code: string,
   mode_reason: ModeReasonCode,
   evidence?: Array<{ item: string; status: string }>,
-  trigger_hits?: TriggerHit[]
+  trigger_hits?: ReadonlyArray<TriggerHit>
 ): PolicyBlock {
   const dv = parseDatasetVersions(DATASET_VERSION_NOTE);
   return {
