@@ -10,7 +10,7 @@
                     "build":  "tsc -p tsconfig.json",
                     "run":  "node --enable-source-maps dist/cli.js",
                     "setup-hooks":  "powershell -NoProfile -ExecutionPolicy Bypass -File tools/setup-hooks.ps1",
-                    "prepare":  "npm run -s setup-hooks"
+                    "prepare": "node -e \"process.exit(process.env.CI?0:1)\" || npm run -s setup-hooks"
                 },
     "repository":  {
                        "type":  "git",
