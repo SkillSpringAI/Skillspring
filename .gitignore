@@ -26,3 +26,15 @@ runtime/*.broken
 runtime/*.bak
 
 # accidental junk files
+# --- SkillSpring local junk / safety backups ---
+*.broken
+*.bak.*
+*.bak
+*.tmp
+*.current.json
+drift-snapshot.current.json
+bject System.Text.UTF8Encoding(False)
+
+# PowerShell scratch
+*.ps1~
+*.psm1~
