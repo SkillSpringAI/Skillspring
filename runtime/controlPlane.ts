@@ -24,7 +24,19 @@ export function makeTraceId(userInput: string): string {
   const h = crypto.createHash("sha256").update(String(userInput)).digest("hex");
   return h.slice(0, 16);
 }
+function dedupeTriggerHits(hits: TriggerHit[]): TriggerHit[] {
+  const seen = new Set<string>();
+  const out: TriggerHit[] = [];
 
+  for (const h of hits) {
+    const key = `${h.dataset}:${h.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(h);
+  }
+
+  return out;
+}
 export function classify(input: PipelineInput): ClassifiedContext {
   const trigger_hits: TriggerHit[] = [];
   const text = input?.user_input ?? "";
@@ -80,7 +92,7 @@ let mode: Mode = "DEFAULT";
     mode,
     mode_reason: reason_code,
     domain_hints: [],
-    trigger_hits,
+  trigger_hits: dedupeTriggerHits(trigger_hits),
     jurisdiction: { confidence: 0 },
     risk: {
       rights_impact: rightsImpact,

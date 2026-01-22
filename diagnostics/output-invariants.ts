@@ -31,6 +31,11 @@ function assertSuccess(out: PipelineOutput, label: string) {
   const o = out as Extract<PipelineOutput, { ok: true }>;
   must(typeof o.mode_reason === "string" && o.mode_reason.length > 0, `${label}: ok:true missing mode_reason`);
   must(!!(o as any).policy, `${label}: ok:true missing policy`);
+  must(Array.isArray((o as any).policy.trigger_hits), `${label}: policy.trigger_hits must be an array`);
+  for (const h of (o as any).policy.trigger_hits) {
+    must(typeof h.dataset === "string", `${label}: trigger_hit missing dataset`);
+    must(typeof h.id === "string", `${label}: trigger_hit missing id`);
+  }
   must((o as any).policy.decision === "ALLOW", `${label}: ok:true policy.decision must be ALLOW`);
   must((o as any).policy.mode_reason === o.mode_reason, `${label}: ok:true policy.mode_reason must match mode_reason`);
   must(typeof (o as any).policy.decision_code === "string" && (o as any).policy.decision_code.length > 0, `${label}: ok:true missing policy.decision_code`);
@@ -48,6 +53,11 @@ function assertRefusal(out: PipelineOutput, label: string) {
   const o = out as Extract<PipelineOutput, { ok: false }>;
   must(typeof o.mode_reason === "string" && o.mode_reason.length > 0, `${label}: ok:false missing mode_reason`);
   must(!!(o as any).policy, `${label}: ok:false missing policy`);
+  must(Array.isArray((o as any).policy.trigger_hits), `${label}: policy.trigger_hits must be an array`);
+  for (const h of (o as any).policy.trigger_hits) {
+    must(typeof h.dataset === "string", `${label}: trigger_hit missing dataset`);
+    must(typeof h.id === "string", `${label}: trigger_hit missing id`);
+  }
   must((o as any).policy.decision === "REFUSE", `${label}: ok:false policy.decision must be REFUSE`);
   must((o as any).policy.mode_reason === o.mode_reason, `${label}: ok:false policy.mode_reason must match mode_reason`);
   must(typeof (o as any).policy.decision_code === "string" && (o as any).policy.decision_code.length > 0, `${label}: ok:false missing policy.decision_code`);
