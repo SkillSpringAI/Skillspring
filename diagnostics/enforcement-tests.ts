@@ -5,9 +5,9 @@
  */
 
 import { readFileSync } from "node:fs";
-import { classify } from "../runtime/controlPlane";
-import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineInput } from "../runtime/types";
+import { classify } from "../runtime/controlPlane.js";
+import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineInput } from "../runtime/types.js";
 
 function loadPatterns(path: string): string[] {
   const obj = JSON.parse(readFileSync(path, "utf8"));

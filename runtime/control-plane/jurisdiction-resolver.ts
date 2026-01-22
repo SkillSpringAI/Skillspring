@@ -1,4 +1,4 @@
-import { ControlContext, ControlDecision } from "./control-plane.types";
+import { ControlContext, ControlDecision } from "./control-plane.types.js";
 
 /**
  * Jurisdiction Resolver

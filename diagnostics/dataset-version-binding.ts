@@ -1,5 +1,5 @@
-﻿import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineInput, PipelineOutput } from "../runtime/types";
+﻿import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineInput, PipelineOutput } from "../runtime/types.js";
 
 function hasDatasetNote(s: string): boolean {
   return s.includes("datasets: dual-use=") && s.includes("reconstruction=");

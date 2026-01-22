@@ -1,11 +1,11 @@
-import { checkEnforcementExpectations } from "./enforcement-tests";
-import { checkDatasetIntegrity } from "./integrity-tests";
-import { pipelineFailClosedDiagnostics } from "./pipeline-tests";
-import { checkOutputInvariants } from "./output-invariants";
-import { checkCapabilityGuard } from "./capability-guard-tests";
-import { checkDatasetVersionBinding } from "./dataset-version-binding";
-import { checkNegativeCapabilities } from "./negative-capability-tests";
-import { checkDriftSnapshots } from "./drift-snapshot";
+import { checkEnforcementExpectations } from "./enforcement-tests.js";
+import { checkDatasetIntegrity } from "./integrity-tests.js";
+import { pipelineFailClosedDiagnostics } from "./pipeline-tests.js";
+import { checkOutputInvariants } from "./output-invariants.js";
+import { checkCapabilityGuard } from "./capability-guard-tests.js";
+import { checkDatasetVersionBinding } from "./dataset-version-binding.js";
+import { checkNegativeCapabilities } from "./negative-capability-tests.js";
+import { checkDriftSnapshots } from "./drift-snapshot.js";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
   try {

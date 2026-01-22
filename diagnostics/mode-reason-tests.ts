@@ -1,5 +1,5 @@
-﻿import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineInput } from "../runtime/types";
+﻿import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineInput } from "../runtime/types.js";
 
 function must(cond: any, msg: string) {
   if (!cond) throw new Error(msg);

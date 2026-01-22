@@ -7,3 +7,34 @@ npm-debug.log*
 Thumbs.db
 
 dist/
+# SkillSpring local editor / repair artifacts
+*.bak.*
+*.broken
+bject System.Text.UTF8Encoding(False)
+
+# local patch artifacts
+*.bak.*
+*.broken
+
+
+# generated artifacts
+diagnostics/drift-snapshot.current.json
+
+# local recovery artifacts
+runtime/*.bak.*
+runtime/*.broken
+runtime/*.bak
+
+# accidental junk files
+# --- SkillSpring local junk / safety backups ---
+*.broken
+*.bak.*
+*.bak
+*.tmp
+*.current.json
+drift-snapshot.current.json
+bject System.Text.UTF8Encoding(False)
+
+# PowerShell scratch
+*.ps1~
+*.psm1~

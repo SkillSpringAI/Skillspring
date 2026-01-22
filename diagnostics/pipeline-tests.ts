@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Diagnostic: Pipeline Fail-Closed Guarantees (current contract)
  * Purpose:
  * 1) Malformed inputs must refuse (fail-closed).
@@ -7,9 +7,9 @@
  */
 
 import { readFileSync } from "node:fs";
-import { classify } from "../runtime/controlPlane";
-import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineInput, PipelineOutput } from "../runtime/types";
+import { classify } from "../runtime/controlPlane.js";
+import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineInput, PipelineOutput } from "../runtime/types.js";
 
 function must(cond: any, msg: string) {
   if (!cond) throw new Error(msg);
@@ -35,6 +35,10 @@ function assertAdmissibleEnvelope(out: PipelineOutput, label: string) {
   if (out.ok === true) {
     must(Array.isArray(out.evidence) && out.evidence.length > 0, `${label}: ok:true must include evidence`);
     must(typeof out.response?.text === "string" && out.response.text.length > 0, `${label}: ok:true missing response text`);
+  
+    must(typeof (out as any).mode_reason === "string" && (out as any).mode_reason.length > 0, `${label}: ok:true missing mode_reason`);
+    must(!!(out as any).policy, `${label}: ok:true missing policy`);
+    must((out as any).policy.decision === "ALLOW", `${label}: ok:true policy.decision must be ALLOW`);
   } else {
     must(typeof out.refusal?.code === "string" && out.refusal.code.length > 0, `${label}: refusal missing code`);
     must(typeof out.refusal?.message === "string" && out.refusal.message.length > 0, `${label}: refusal missing message`);

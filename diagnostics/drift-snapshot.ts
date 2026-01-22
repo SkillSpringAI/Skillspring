@@ -1,6 +1,6 @@
-﻿import crypto from "node:crypto";
-import { runGovernedPipeline } from "../runtime/pipeline";
-import type { PipelineOutput } from "../runtime/types";
+import crypto from "node:crypto";
+import { runGovernedPipeline } from "../runtime/pipeline.js";
+import type { PipelineOutput } from "../runtime/types.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 function must(cond: any, msg: string) {
