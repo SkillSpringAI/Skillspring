@@ -1,0 +1,20 @@
+#!/bin/sh
+# Repo-shared pre-push hook
+# Set SKIP_PREFLIGHT=1 to bypass intentionally.
+
+if [ "$SKIP_PREFLIGHT" = "1" ]; then
+  echo "pre-push: SKIP_PREFLIGHT=1 set, skipping."
+  exit 0
+fi
+
+echo "pre-push: running preflight (build + diag)..."
+npm run -s preflight
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "pre-push: preflight failed, aborting push."
+  exit $status
+fi
+
+echo "pre-push: ok"
+exit 0
