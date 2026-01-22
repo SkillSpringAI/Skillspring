@@ -16,3 +16,13 @@ bject System.Text.UTF8Encoding(False)
 *.bak.*
 *.broken
 
+
+# generated artifacts
+diagnostics/drift-snapshot.current.json
+
+# local recovery artifacts
+runtime/*.bak.*
+runtime/*.broken
+runtime/*.bak
+
+# accidental junk files

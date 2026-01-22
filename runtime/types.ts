@@ -38,7 +38,7 @@ export type PolicyBlock = {
     reconstruction: string;
     [k: string]: string;
   };
-  trigger_hits: TriggerHit[];
+  trigger_hits: readonly TriggerHit[];
   evidence_status: PolicyEvidenceStatus;
 };
 
@@ -54,7 +54,7 @@ export type ClassifiedContext = {
   mode: Mode;
   mode_reason: ModeReasonCode;
   domain_hints: string[];
-  trigger_hits: TriggerHit[];
+  trigger_hits: readonly TriggerHit[];
   jurisdiction?: {
     guess?: string;
     confidence: number;

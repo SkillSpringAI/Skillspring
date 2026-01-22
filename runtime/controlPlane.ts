@@ -88,6 +88,8 @@ let mode: Mode = "DEFAULT";
           : rightsImpact
             ? "RIGHTS_IMPACT"
             : "DEFAULT_SAFE";
+  Object.freeze(trigger_hits);
+
   return {
     mode,
     mode_reason: reason_code,
