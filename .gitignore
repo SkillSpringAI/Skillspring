@@ -7,3 +7,12 @@ npm-debug.log*
 Thumbs.db
 
 dist/
+# SkillSpring local editor / repair artifacts
+*.bak.*
+*.broken
+bject System.Text.UTF8Encoding(False)
+
+# local patch artifacts
+*.bak.*
+*.broken
+
