@@ -23,6 +23,10 @@ export type TriggerHit = {
   dataset: string;
   id: string;
   match?: string;
+
+  // provenance (optional until schema is updated)
+  source?: "keyword" | "heuristic" | "rule";
+  confidence?: number; // 0..1
 };
 
 export type PolicyBlock = {
