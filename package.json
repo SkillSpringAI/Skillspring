@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "SkillSpring governance-first AI architecture",
   "type": "module",
-  "scripts": {
+  "scripts":{
     "dev": "tsx src/cli.ts",
     "diag": "tsx diagnostics/run.ts",
     "build": "tsc -p tsconfig.json",
