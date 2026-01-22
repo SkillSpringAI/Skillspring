@@ -16,14 +16,16 @@ function evidenceStatusFrom(evidence: Array<{ item: string; status: string }>): 
   return anyUnknown ? "UNKNOWN" : "KNOWN";
 }
 
-function makePolicy(decision: "ALLOW" | "REFUSE",
+function makePolicy(
+  decision: "ALLOW" | "REFUSE",
   decision_code: string,
   mode_reason: ModeReasonCode,
   evidence?: Array<{ item: string; status: string }>,
-  trigger_hits?: ReadonlyArray<TriggerHit>
+  trigger_hits?: readonly TriggerHit[]
 ): PolicyBlock {
   const dv = parseDatasetVersions(DATASET_VERSION_NOTE);
-  return {
+
+  const policy: PolicyBlock = {
     decision,
     decision_code,
     mode_reason,
@@ -31,9 +33,11 @@ function makePolicy(decision: "ALLOW" | "REFUSE",
       dual_use: dv.dual_use,
       reconstruction: dv.reconstruction
     },
-    trigger_hits: trigger_hits ?? [],
+    trigger_hits: trigger_hits ? [...trigger_hits] : [],
     evidence_status: evidence ? evidenceStatusFrom(evidence) : "UNKNOWN"
   };
+
+  return Object.freeze(policy) as PolicyBlock;
 }
 
 export async function runGovernedPipeline(input: PipelineInput): Promise<PipelineOutput> {
