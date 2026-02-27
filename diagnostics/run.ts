@@ -1,4 +1,4 @@
-import { checkEnforcementExpectations } from "./enforcement-tests.js";
+﻿import { checkEnforcementExpectations } from "./enforcement-tests.js";
 import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { pipelineFailClosedDiagnostics } from "./pipeline-tests.js";
 import { checkOutputInvariants } from "./output-invariants.js";
@@ -6,6 +6,7 @@ import { checkCapabilityGuard } from "./capability-guard-tests.js";
 import { checkDatasetVersionBinding } from "./dataset-version-binding.js";
 import { checkNegativeCapabilities } from "./negative-capability-tests.js";
 import { checkDriftSnapshots } from "./drift-snapshot.js";
+import { run as checkRefusalPreservation } from "./refusal-preservation";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
   try {
@@ -27,10 +28,13 @@ async function main() {
   await runStep("negative-capabilities", () => checkNegativeCapabilities());
   await runStep("drift-snapshot", () => checkDriftSnapshots());
 
-  console.log("DIAG: PASS");
+  
+  await runStep("refusal-preservation", () => checkRefusalPreservation());
+console.log("DIAG: PASS");
 }
 
 main().catch((err) => {
   console.error("DIAG: FAIL");
   throw err;
 });
+
