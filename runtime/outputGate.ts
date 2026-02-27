@@ -1,7 +1,8 @@
-import Ajv from "ajv";
+﻿import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "../schemas/output.schema.json";
 import type { PipelineOutput, Mode, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus } from "./types.js";
+import { loadRegistries } from "./registries/registryIndex.js";
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -43,11 +44,21 @@ function extractDatasetNote(out: any): string | null {
 function parseDatasetVersions(note: string | null): { dual_use: string; reconstruction: string } {
   if (!note) return { dual_use: "UNKNOWN", reconstruction: "UNKNOWN" };
 
-  // Accept either: "datasets: dual-use=X reconstruction=Y" (common in messages)
-  // or any string containing "dual-use=" and "reconstruction="
   const du = /dual-use=([^\s\)]+)/i.exec(note)?.[1] ?? "UNKNOWN";
   const rc = /reconstruction=([^\s\)]+)/i.exec(note)?.[1] ?? "UNKNOWN";
   return { dual_use: du, reconstruction: rc };
+}
+
+function ensureDatasetNote(message: string, out: any): string {
+  // Prefer existing dataset note if present
+  const note = extractDatasetNote(out);
+  if (note) return message.includes("datasets:") ? message : `${message} (${note})`;
+
+  // Fallback: enforce presence of dataset note for diagnostics.
+  // Values may be UNKNOWN if the upstream output had no evidence.
+  const dv = parseDatasetVersions(null);
+  const fallback = `datasets: dual-use=${dv.dual_use} reconstruction=${dv.reconstruction}`;
+  return message.includes("datasets:") ? message : `${message} (${fallback})`;
 }
 
 function evidenceStatusFrom(out: any): PolicyEvidenceStatus {
@@ -70,12 +81,42 @@ function makePolicy(out: any, decision: "ALLOW" | "REFUSE", decision_code: strin
   };
 }
 
+type RefusalBinding = {
+  invariant_id: string;
+  failure_code: string;
+  owner: string;
+  retry_scope: "none" | "scoped_retry" | "artifact_rebuild";
+};
+
+function bindRefusal(code: string): RefusalBinding {
+  // Map internal refusal codes to invariants (must exist in registries)
+  const mapping: Record<string, { invariant_id: string }> = {
+    "REFUSE-OUTPUT-NOT-ADMISSIBLE": { invariant_id: "INV-030" },
+    "REFUSE-CAPABILITY-LEAK": { invariant_id: "INV-031" }
+  };
+
+  const invId = mapping[code]?.invariant_id ?? "INV-032";
+
+  const { failure, invariants } = loadRegistries();
+  const inv = invariants.invariants.find((x) => x.invariant_id === invId);
+  if (!inv) throw new Error(`OutputGate: unknown invariant_id for refusal binding: ${invId}`);
+
+  const fc = failure.codes.find((x) => x.code === inv.failure_code);
+  if (!fc) throw new Error(`OutputGate: invariant ${invId} references unknown failure_code: ${inv.failure_code}`);
+
+  return {
+    invariant_id: inv.invariant_id,
+    failure_code: fc.code,
+    owner: inv.owner,
+    retry_scope: fc.retry_scope
+  };
+}
+
 function refusal(out: any, code: string, message: string): PipelineOutput {
   const mode = safeMode(out);
   const mode_reason = safeModeReason(out);
   const trace_id = safeTraceId(out);
 
-  // Map internal refusal codes to stable decision codes
   const decision_code =
     code === "REFUSE-CAPABILITY-LEAK"
       ? "REFUSE_CAPABILITY_LEAK"
@@ -83,13 +124,15 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
         ? "REFUSE_SCHEMA_INVALID"
         : "REFUSE_UNSAFE_OR_UNKNOWN";
 
+  const binding = bindRefusal(code);
+
   return {
     ok: false,
     mode,
     mode_reason,
     trace_id,
     policy: makePolicy(out, "REFUSE", decision_code),
-    refusal: { code, message }
+    refusal: { code, message: ensureDatasetNote(message, out), ...binding }
   };
 }
 
@@ -155,15 +198,35 @@ function detectCapabilityLeak(text: string): string | null {
   return null;
 }
 
+
+function normalizeRefusalIfNeeded(out: any): any {
+  // If upstream created a refusal, ensure it meets the current refusal schema.
+  if (out?.ok === false && out?.refusal?.code && typeof out?.refusal?.message === "string") {
+    const r = out.refusal;
+
+    // Add registry binding fields if missing
+    const missingBinding =
+      !r.invariant_id || !r.failure_code || !r.owner || !r.retry_scope;
+
+    const binding = missingBinding ? bindRefusal(String(r.code)) : null;
+
+    out.refusal = {
+      ...r,
+      ...(binding ?? {}),
+      message: ensureDatasetNote(String(r.message), out)
+    };
+  }
+  return out;
+}
+
 export function assertAdmissible(out: PipelineOutput): PipelineOutput {
-  // Schema validate first
-  const ok = validate(out as any);
+  const normalized = normalizeRefusalIfNeeded(out);
+  const ok = validate(normalized as any);
   if (!ok) {
     const details = JSON.stringify(validate.errors ?? [], null, 2);
-    return refusal(out, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
+    return refusal(normalized, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
   }
 
-  // Capability leak scan only for ok outputs
   if (out.ok === true) {
     const text = out.response?.text ?? "";
     if (typeof text === "string" && text.length > 0) {
@@ -182,3 +245,7 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
 
   return out;
 }
+
+
+
+
