@@ -1,0 +1,41 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skillspring://schemas/registries/invariants.schema.json",
+  "title": "Invariant Registry v1",
+  "type": "object",
+  "required": ["version", "invariants"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string", "pattern": "^v1$" },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["invariant_id", "owner", "failure_code", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "invariant_id": {
+            "type": "string",
+            "pattern": "^INV-[0-9]{3}$"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Primary layer owner for enforcement",
+            "enum": ["CP", "MN", "NM", "LK", "LG", "OP", "DIAG"]
+          },
+          "failure_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,8}-(H|S|A)-[0-9]{3}$"
+          },
+          "description": { "type": "string", "minLength": 3, "maxLength": 300 },
+          "retry_scope": {
+            "type": "string",
+            "enum": ["none", "scoped_retry", "artifact_rebuild"],
+            "description": "Optional override; otherwise derived from failure_code registry"
+          }
+        }
+      }
+    }
+  }
+}
