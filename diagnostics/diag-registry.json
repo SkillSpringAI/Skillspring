@@ -1,37 +1,61 @@
-{
-  "schema_version": "1.0.0",
-  "status": "canonical",
-  "description": "Registry of diagnostic checks for SkillSpring governance, datasets, enforcement, and pipeline behavior.",
-  "diagnostics": [
-    {
-      "id": "DIAG-01",
-      "name": "Trigger Registry Integrity",
-      "scope": "schemas/triggers",
-      "purpose": "Ensure trigger registry exists, is valid JSON, and contains no authority-granting fields."
-    },
-    {
-      "id": "DIAG-02",
-      "name": "Dataset Presence Check",
-      "scope": "datasets",
-      "purpose": "Ensure required datasets are present and versioned."
-    },
-    {
-      "id": "DIAG-03",
-      "name": "Trigger–Dataset Mapping Coverage",
-      "scope": "docs",
-      "purpose": "Ensure every trigger is mapped to at least one dataset."
-    },
-    {
-      "id": "DIAG-04",
-      "name": "Output Admissibility Schema Validation",
-      "scope": "schemas/outputs",
-      "purpose": "Ensure output admissibility schema exists and forbids additional properties."
-    },
-    {
-      "id": "DIAG-05",
-      "name": "Pipeline Fail-Closed Behavior",
-      "scope": "runtime/pipeline",
-      "purpose": "Ensure end-to-end pipeline enforces control, execution, and output gating without bypass."
-    }
-  ]
+﻿{
+    "schema_version":  "1.0.0",
+    "status":  "canonical",
+    "description":  "Registry of diagnostic checks for SkillSpring governance, datasets, enforcement, and pipeline behavior.",
+    "diagnostics":  [
+                        {
+                            "id":  "DIAG-01",
+                            "name":  "Trigger Registry Integrity",
+                            "scope":  "schemas/triggers",
+                            "purpose":  "Ensure trigger registry exists, is valid JSON, and contains no authority-granting fields."
+                        },
+                        {
+                            "id":  "DIAG-02",
+                            "name":  "Dataset Presence Check",
+                            "scope":  "datasets",
+                            "purpose":  "Ensure required datasets are present and versioned."
+                        },
+                        {
+                            "id":  "DIAG-03",
+                            "name":  "Triggerâ€“Dataset Mapping Coverage",
+                            "scope":  "docs",
+                            "purpose":  "Ensure every trigger is mapped to at least one dataset."
+                        },
+                        {
+                            "id":  "DIAG-04",
+                            "name":  "Output Admissibility Schema Validation",
+                            "scope":  "schemas/outputs",
+                            "purpose":  "Ensure output admissibility schema exists and forbids additional properties."
+                        },
+                        {
+                            "id":  "DIAG-05",
+                            "name":  "Pipeline Fail-Closed Behavior",
+                            "scope":  "runtime/pipeline",
+                            "purpose":  "Ensure end-to-end pipeline enforces control, execution, and output gating without bypass."
+                        },
+                        {
+                            "id":  "DIAG-06",
+                            "name":  "Refusal Code Preservation",
+                            "scope":  "runtime/outputGate",
+                            "purpose":  "Ensure OutputGate does not rewrite an upstream refusal.code; it may only normalize/enrich/bind."
+                        },
+                        {
+                            "id":  "DIAG-07",
+                            "name":  "Failure Registry Completeness",
+                            "scope":  "runtime + diagnostics",
+                            "purpose":  "Ensure every failure_code used in code exists in the canonical registry."
+                        },
+                        {
+                            "id":  "DIAG-08",
+                            "name":  "Allow Output Preservation",
+                            "scope":  "runtime/outputGate",
+                            "purpose":  "Ensure OutputGate does not downgrade ok:true outputs without explicit invariant breach."
+                        },
+                        {
+                            "id":  "DIAG-09",
+                            "name":  "Registry Change Protocol Enforcement",
+                            "scope":  "schemas/registries + runtime/registries",
+                            "purpose":  "Enforce append-only versioning: no edits to *.vN.json; new versions require generated TS, registryIndex update, and CHANGELOG entry."
+                        }
+                    ]
 }
