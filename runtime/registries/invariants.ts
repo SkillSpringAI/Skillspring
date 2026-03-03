@@ -1,6 +1,6 @@
 ﻿import type { RetryScope, FailureCodeRegistryV1 } from "./failureCodes";
 import { getFailureCodeIndex, loadFailureCodeRegistry } from "./failureCodes";
-import { INVARIANTS_V1 } from "./generated/invariants.v1";
+import { INVARIANTS_V2 } from "./generated/invariants.v2";
 
 export type InvariantOwner = "CP" | "MN" | "NM" | "LK" | "LG" | "OP" | "DIAG";
 
@@ -13,7 +13,7 @@ export interface InvariantEntry {
 }
 
 export interface InvariantRegistryV1 {
-  version: "v1";
+  version: "v1" | "v2";
   invariants: InvariantEntry[];
 }
 
@@ -21,7 +21,7 @@ export function loadInvariantRegistry(opts?: {
   failureRegistry?: FailureCodeRegistryV1;
 }): InvariantRegistryV1 {
   // Runtime is filesystem-free. Schema validation happens in diagnostics.
-  const data = INVARIANTS_V1;
+  const data = INVARIANTS_V2 as any;
 
   // Still enforce binding law at runtime (pure, in-memory check).
   const failureReg = opts?.failureRegistry ?? loadFailureCodeRegistry();
@@ -52,3 +52,4 @@ export function getInvariantIndex(reg: InvariantRegistryV1): Map<string, Invaria
   for (const inv of reg.invariants) m.set(inv.invariant_id, inv);
   return m;
 }
+

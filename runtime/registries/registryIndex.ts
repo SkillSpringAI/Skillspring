@@ -1,4 +1,5 @@
-﻿import { loadFailureCodeRegistry } from "./failureCodes";
+﻿import { INVARIANTS_V2 } from "./generated/invariants.v2";
+import { loadFailureCodeRegistry } from "./failureCodes";
 import { loadInvariantRegistry } from "./invariants";
 
 export function loadRegistries() {
@@ -6,3 +7,5 @@ export function loadRegistries() {
   const invariants = loadInvariantRegistry({ failureRegistry: failure });
   return { failure, invariants };
 }
+
+

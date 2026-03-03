@@ -1,7 +1,7 @@
 ﻿import fs from "node:fs";
 import path from "node:path";
-import { FAILURE_CODES_V1 } from "../runtime/registries/generated/failureCodes.v1";
-import { INVARIANTS_V1 } from "../runtime/registries/generated/invariants.v1";
+import { FAILURE_CODES_V2 } from "../runtime/registries/generated/failureCodes.v2";
+import { INVARIANTS_V2 } from "../runtime/registries/generated/invariants.v2";
 
 function must(cond: any, msg: string) {
   if (!cond) throw new Error(msg);
@@ -46,8 +46,8 @@ export async function run() {
   const foundFailureCodes = collectMatches(repoRoot, failureRx);
   const foundInvariantIds = collectMatches(repoRoot, invRx);
 
-  const registeredFailure = new Set(FAILURE_CODES_V1.codes.map((c) => c.code));
-  const registeredInv = new Set(INVARIANTS_V1.invariants.map((i) => i.invariant_id));
+  const registeredFailure = new Set(FAILURE_CODES_V2.codes.map((c) => c.code));
+  const registeredInv = new Set(INVARIANTS_V2.invariants.map((i) => i.invariant_id));
 
   for (const code of foundFailureCodes) {
     must(registeredFailure.has(code), `registry-completeness: failure_code not registered: ${code}`);
@@ -65,3 +65,5 @@ export async function run() {
     registered_invariant_ids: registeredInv.size
   };
 }
+
+
