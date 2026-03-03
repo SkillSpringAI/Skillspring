@@ -32,6 +32,29 @@ export const INVARIANTS_V1: InvariantRegistryV1 = {
       failure_code: "LG-A-001",
       description: "DLA/PT schema mismatch triggers artifact rebuild only",
       retry_scope: "artifact_rebuild"
+    }    ,
+    {
+      invariant_id: "INV-032",
+      owner: "OP",
+      failure_code: "LG-H-001",
+      description: "Output refusal binding must reference a registered invariant_id"
+    }    ,
+    {
+      invariant_id: "INV-031",
+      owner: "OP",
+      failure_code: "LG-H-001",
+      description: "Capability-leak refusals must bind to a registered invariant_id"
+    }    ,
+    {
+      invariant_id: "INV-030",
+      owner: "OP",
+      failure_code: "LG-A-001",
+      description: "Output admissibility schema validation must be enforced for all outputs"
     }
   ]
 };
+
+
+
+
+

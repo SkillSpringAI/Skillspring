@@ -9,6 +9,7 @@ import { checkDriftSnapshots } from "./drift-snapshot.js";
 
 import { run as checkRefusalPreservation } from "./refusal-preservation";
 import { run as checkRegistryCompleteness } from "./registry-completeness";
+import { run as checkRegistryChangeProtocol } from "./registry-change-protocol";
 import { run as checkAllowPreservation } from "./allow-preservation";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
@@ -33,6 +34,7 @@ async function main() {
 
   await runStep("refusal-preservation", () => checkRefusalPreservation());
   await runStep("registry-completeness", () => checkRegistryCompleteness());
+  await runStep("registry-change-protocol", () => checkRegistryChangeProtocol());
   await runStep("allow-preservation", () => checkAllowPreservation());
 
   console.log("DIAG: PASS");
@@ -42,4 +44,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-
