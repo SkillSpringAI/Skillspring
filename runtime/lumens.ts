@@ -95,8 +95,7 @@ export function verifyAuthority(opts: {
     }
 
     if (pt.expires_at) {
-      // Deterministic default for verification callers that do not inject time.
-      const now = opts.now ?? new Date(0);
+      const now = opts.now ?? new Date();
       const expMs = Date.parse(String(pt.expires_at));
       if (Number.isFinite(expMs) && expMs <= now.getTime()) {
         return fail("REFUSE-LUMENS-PT-EXPIRED", "Lumens: PT has expired.", "INV-001");
