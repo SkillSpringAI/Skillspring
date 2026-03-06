@@ -1,0 +1,27 @@
+{
+  "$id": "skillspring.authority.pt.v1",
+  "type": "object",
+  "required": [
+    "token_id",
+    "bound_dla_id",
+    "expires_at",
+    "allow_execution",
+    "allow_output",
+    "jurisdiction_scope",
+    "retry_scope"
+  ],
+  "properties": {
+    "token_id": { "type": "string", "minLength": 8 },
+    "bound_dla_id": { "type": "string", "minLength": 8 },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "allow_execution": { "type": "boolean" },
+    "allow_output": { "type": "boolean" },
+    "jurisdiction_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "retry_scope": { "enum": ["none", "scoped_retry", "artifact_rebuild"] }
+  },
+  "additionalProperties": false
+}

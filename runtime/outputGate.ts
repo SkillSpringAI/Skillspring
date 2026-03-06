@@ -92,7 +92,11 @@ function bindRefusal(code: string): RefusalBinding {
   // Map internal refusal codes to invariants (must exist in registries)
   const mapping: Record<string, { invariant_id: string }> = {
     "REFUSE-OUTPUT-NOT-ADMISSIBLE": { invariant_id: "INV-030" },
-    "REFUSE-CAPABILITY-LEAK": { invariant_id: "INV-031" }
+    "REFUSE-CAPABILITY-LEAK": { invariant_id: "INV-031" },
+    "REFUSE-INVALID-DLA": { invariant_id: "INV-032" },
+    "REFUSE-INVALID-PT": { invariant_id: "INV-032" },
+    "REFUSE-MISSING-DLA": { invariant_id: "INV-032" },
+    "REFUSE-MISSING-PT": { invariant_id: "INV-032" }
   };
 
   const invId = mapping[code]?.invariant_id ?? "INV-032";

@@ -2,6 +2,7 @@ import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyE
 import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
+import { buildDecisionLegitimacyArtifact, buildPermissionToken, validateDecisionLegitimacyArtifact, validatePermissionToken } from "./authority/artifacts.js";
 
 const DATASET_VERSION_NOTE = "datasets: dual-use=v1; reconstruction=v1";
 
@@ -40,45 +41,147 @@ function makePolicy(
   return Object.freeze(policy) as PolicyBlock;
 }
 
+function canonicalRefusal(
+  mode: PipelineOutput["mode"],
+  mode_reason: ModeReasonCode,
+  trace_id: string,
+  decision_code: string,
+  refusal_code: string,
+  message: string,
+  trigger_hits: readonly TriggerHit[]
+): PipelineOutput {
+  return assertAdmissible({
+    ok: false,
+    mode,
+    mode_reason,
+    trace_id,
+    policy: makePolicy("REFUSE", decision_code, mode_reason, undefined, trigger_hits),
+    refusal: {
+      code: refusal_code,
+      message
+    }
+  });
+}
+
 export async function runGovernedPipeline(input: PipelineInput): Promise<PipelineOutput> {
-  // Fail-closed invalid input
   if (!input || typeof input.user_input !== "string" || input.user_input.trim() === "") {
     const mode_reason: ModeReasonCode = "DEFAULT_SAFE";
-    return assertAdmissible({
-      ok: false,
-      mode: "GOVERNANCE",
+    return canonicalRefusal(
+      "GOVERNANCE",
       mode_reason,
-      trace_id: "NO_TRACE_ID",
-      policy: makePolicy("REFUSE", "REFUSE_INVALID_INPUT", mode_reason, undefined, []),
-      refusal: {
-        code: "REFUSE-INVALID-INPUT",
-        message: "Invalid or missing user_input. (" + DATASET_VERSION_NOTE + ")"
-      }
-    });
+      "NO_TRACE_ID",
+      "REFUSE_INVALID_INPUT",
+      "REFUSE-INVALID-INPUT",
+      `Invalid or missing user_input. (${DATASET_VERSION_NOTE})`,
+      []
+    );
   }
 
   const trace_id = makeTraceId(input.user_input);
   const ctx = classify(input);
   const mode_reason_note = `mode_reason=${ctx.mode_reason}`;
 
-  // Hard refusal triggers (fail-closed)
-  if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
-    const decision_code = ctx.risk.reconstruction_risk ? "REFUSE_RECONSTRUCTION_RISK" : "REFUSE_DUAL_USE";
-    return assertAdmissible({
-      ok: false,
-      mode: ctx.mode,
-      mode_reason: ctx.mode_reason,
+  const testOverrides = input.meta?.authority_test_overrides;
+  const omitDla = testOverrides?.omit_dla === true;
+  const omitPt = testOverrides?.omit_pt === true;
+  const tamperDlaHash = testOverrides?.tamper_dla_hash === true;
+  const tamperPtScopeEmpty = testOverrides?.tamper_pt_scope_empty === true;
+
+  const baseDecisionCode =
+    ctx.mode === "DEFAULT" ? "ALLOW_DEFAULT_SAFE" : ctx.mode === "GOVERNANCE" ? "ALLOW_GOVERNED_SAFE" : "ALLOW_ARCHITECT_SAFE";
+
+  // Branch 1 (always): build + validate DLA before any output emission.
+  if (omitDla) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
       trace_id,
-      policy: makePolicy("REFUSE", decision_code, ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
-      refusal: {
-        code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-        message:
-          `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`
-      }
-    });
+      "REFUSE_MISSING_DLA",
+      "REFUSE-MISSING-DLA",
+      `Decision legitimacy artifact missing under required authority policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
   }
 
-  // Control -> Execution handshake (stub)
+  const builtDla = buildDecisionLegitimacyArtifact({
+    trace_id,
+    mode: ctx.mode,
+    mode_reason: ctx.mode_reason,
+    policy_snapshot: {
+      decision: ctx.risk.dual_use || ctx.risk.reconstruction_risk ? "REFUSE" : "ALLOW",
+      decision_code: ctx.risk.dual_use || ctx.risk.reconstruction_risk ? "REFUSE_DUAL_USE_OR_RECONSTRUCTION" : baseDecisionCode,
+      mode_reason: ctx.mode_reason
+    }
+  });
+
+  const decisionArtifact = tamperDlaHash
+    ? { ...builtDla, integrity_hash: "0".repeat(64) }
+    : builtDla;
+
+  const artifactCheck = validateDecisionLegitimacyArtifact(decisionArtifact);
+  if (!artifactCheck.ok) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      "REFUSE_INVALID_DLA",
+      "REFUSE-INVALID-DLA",
+      `Decision legitimacy artifact failed validation: ${artifactCheck.errors}. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
+    const decision_code = ctx.risk.reconstruction_risk ? "REFUSE_RECONSTRUCTION_RISK" : "REFUSE_DUAL_USE";
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      decision_code,
+      "REFUSE-DUALUSE-OR-RECONSTRUCTION",
+      `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  // Branch 2 (allow-only): build + validate PT only after allow path is established.
+  if (omitPt) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      "REFUSE_MISSING_PT",
+      "REFUSE-MISSING-PT",
+      `Permission token missing under required authority policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  const builtPt = buildPermissionToken({
+    bound_dla_id: decisionArtifact.id,
+    allow_execution: true,
+    allow_output: true,
+    jurisdiction_scope: ["GLOBAL"],
+    retry_scope: "none"
+  });
+
+  const permissionToken = tamperPtScopeEmpty
+    ? { ...builtPt, jurisdiction_scope: [] as string[] }
+    : builtPt;
+
+  const tokenCheck = validatePermissionToken(permissionToken);
+  if (!tokenCheck.ok) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      "REFUSE_INVALID_PT",
+      "REFUSE-INVALID-PT",
+      `Permission token failed validation: ${tokenCheck.errors}. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
   const exec = await executeStub(ctx);
 
   const evidence: Array<{ item: string; status: "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE" }> = [
@@ -86,24 +189,21 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     { item: "Jurisdiction", status: "UNKNOWN" },
     { item: "Domain classification", status: "ASSUMED" },
     { item: `Mode reason (${mode_reason_note})`, status: "ASSUMED" },
-    { item: `Dataset versions (${DATASET_VERSION_NOTE})`, status: "PROVIDED" }
+    { item: `Dataset versions (${DATASET_VERSION_NOTE})`, status: "PROVIDED" },
+    { item: "Decision legitimacy artifact (present)", status: "PROVIDED" },
+    { item: "Permission token (present)", status: "PROVIDED" }
   ];
 
-  const decision_code =
-    ctx.mode === "DEFAULT" ? "ALLOW_DEFAULT_SAFE" : ctx.mode === "GOVERNANCE" ? "ALLOW_GOVERNED_SAFE" : "ALLOW_ARCHITECT_SAFE";
-
-  const out: PipelineOutput = {
+  return assertAdmissible({
     ok: true,
     mode: ctx.mode,
     mode_reason: ctx.mode_reason,
     trace_id,
-    policy: makePolicy("ALLOW", decision_code, ctx.mode_reason, evidence, ctx.trigger_hits ?? []),
+    policy: makePolicy("ALLOW", baseDecisionCode, ctx.mode_reason, evidence, ctx.trigger_hits ?? []),
     evidence,
     response: {
       type: "SAFE_STUB",
-      text: `Governance pipeline OK. ${exec.note}\n` + `No agentic execution is implemented by design.`
+      text: `Governance pipeline OK. ${exec.note}\nNo agentic execution is implemented by design.`
     }
-  };
-
-  return assertAdmissible(out);
+  });
 }
