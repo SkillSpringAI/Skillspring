@@ -3,6 +3,7 @@ import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
 import { buildDecisionLegitimacyArtifact, buildPermissionToken, validateDecisionLegitimacyArtifact, validatePermissionToken } from "./authority/artifacts.js";
+import { verifyAuthority } from "./lumens.js";
 
 const DATASET_VERSION_NOTE = "datasets: dual-use=v1; reconstruction=v1";
 
@@ -86,6 +87,9 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   const omitPt = testOverrides?.omit_pt === true;
   const tamperDlaHash = testOverrides?.tamper_dla_hash === true;
   const tamperPtScopeEmpty = testOverrides?.tamper_pt_scope_empty === true;
+  const lumensTamperDlaPayload = testOverrides?.lumens_tamper_dla_payload === true;
+  const lumensPtBindingMismatch = testOverrides?.lumens_pt_binding_mismatch === true;
+  const lumensPtExpired = testOverrides?.lumens_pt_expired === true;
 
   const baseDecisionCode =
     ctx.mode === "DEFAULT" ? "ALLOW_DEFAULT_SAFE" : ctx.mode === "GOVERNANCE" ? "ALLOW_GOVERNED_SAFE" : "ALLOW_ARCHITECT_SAFE";
@@ -131,11 +135,111 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     );
   }
 
+  const lumensDla = lumensTamperDlaPayload
+    ? {
+        ...decisionArtifact,
+        policy_snapshot: {
+          ...decisionArtifact.policy_snapshot,
+          decision_code: `${decisionArtifact.policy_snapshot.decision_code}_TAMPERED`
+        }
+      }
+    : decisionArtifact;
+
+  const lumensDlaCheck = verifyAuthority({ dla: lumensDla, policy: { mode: ctx.mode, mode_reason: ctx.mode_reason } });
+  if (!lumensDlaCheck.ok) {
+    return assertAdmissible({
+      ok: false,
+      mode: ctx.mode,
+      mode_reason: ctx.mode_reason,
+      trace_id,
+      policy: makePolicy("REFUSE", "REFUSE_LUMENS_AUTHORITY", ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
+      refusal: {
+        code: lumensDlaCheck.code,
+        message: `${lumensDlaCheck.message} (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+        invariant_id: lumensDlaCheck.invariant_id,
+        failure_code: lumensDlaCheck.failure_code,
+        owner: lumensDlaCheck.owner,
+        retry_scope: lumensDlaCheck.retry_scope
+      }
+    });
+  }
+
   if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
     const decision_code = ctx.risk.reconstruction_risk ? "REFUSE_RECONSTRUCTION_RISK" : "REFUSE_DUAL_USE";
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
+      trace_id,
+      decision_code,
+      "REFUSE-DUALUSE-OR-RECONSTRUCTION",
+      `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  // Branch 2 (allow-only): build + validate PT only after allow path is established.
+  if (omitPt) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      "REFUSE_MISSING_PT",
+      "REFUSE-MISSING-PT",
+      `Permission token missing under required authority policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  const builtPt = buildPermissionToken({
+    bound_dla_id: decisionArtifact.id,
+    allow_execution: true,
+    allow_output: true,
+    jurisdiction_scope: ["GLOBAL"],
+    retry_scope: "none"
+  });
+
+  const permissionToken = tamperPtScopeEmpty
+    ? { ...builtPt, jurisdiction_scope: [] as string[] }
+    : lumensPtBindingMismatch
+      ? { ...builtPt, bound_dla_id: "dla_mismatch" }
+      : lumensPtExpired
+        ? { ...builtPt, expires_at: "1970-01-01T00:00:00.000Z" }
+        : builtPt;
+
+  const tokenCheck = validatePermissionToken(permissionToken);
+  if (!tokenCheck.ok) {
+    return canonicalRefusal(
+      ctx.mode,
+      ctx.mode_reason,
+      trace_id,
+      "REFUSE_INVALID_PT",
+      "REFUSE-INVALID-PT",
+      `Permission token failed validation: ${tokenCheck.errors}. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      ctx.trigger_hits ?? []
+    );
+  }
+
+  const lumensPtCheck = verifyAuthority({
+    dla: lumensDla,
+    pt: permissionToken,
+    policy: { mode: ctx.mode, mode_reason: ctx.mode_reason }
+  });
+  if (!lumensPtCheck.ok) {
+    return assertAdmissible({
+      ok: false,
+      mode: ctx.mode,
+      mode_reason: ctx.mode_reason,
+      trace_id,
+      policy: makePolicy("REFUSE", "REFUSE_LUMENS_AUTHORITY", ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
+      refusal: {
+        code: lumensPtCheck.code,
+        message: `${lumensPtCheck.message} (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+        invariant_id: lumensPtCheck.invariant_id,
+        failure_code: lumensPtCheck.failure_code,
+        owner: lumensPtCheck.owner,
+        retry_scope: lumensPtCheck.retry_scope
+      }
+    });
       trace_id,
       decision_code,
       "REFUSE-DUALUSE-OR-RECONSTRUCTION",

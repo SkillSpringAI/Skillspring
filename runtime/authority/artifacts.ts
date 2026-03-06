@@ -54,6 +54,32 @@ function createId(prefix: "dla" | "pt", seed: string): string {
   return `${prefix}_${sha256Hex(seed).slice(0, 16)}`;
 }
 
+export function computeDecisionLegitimacyIntegrityHash(input: {
+  id: string;
+  trace_id: string;
+  parent_dla?: string | null;
+  mode: Mode;
+  mode_reason: ModeReasonCode;
+  policy_snapshot: {
+    decision: PolicyDecision;
+    decision_code: string;
+    mode_reason: ModeReasonCode;
+  };
+  timestamp: string;
+}): string {
+  return sha256Hex(
+    canonicalJson({
+      id: input.id,
+      trace_id: input.trace_id,
+      parent_dla: input.parent_dla ?? null,
+      mode: input.mode,
+      mode_reason: input.mode_reason,
+      policy_snapshot: input.policy_snapshot,
+      timestamp: input.timestamp
+    })
+  );
+}
+
 export function buildDecisionLegitimacyArtifact(input: {
   trace_id: string;
   parent_dla?: string | null;
@@ -107,6 +133,15 @@ export function validateDecisionLegitimacyArtifact(input: unknown): { ok: true }
 
   const artifact = input as DecisionLegitimacyArtifact;
 
+  const recalculated = computeDecisionLegitimacyIntegrityHash({
+    id: artifact.id,
+    trace_id: artifact.trace_id,
+    parent_dla: artifact.parent_dla ?? null,
+    mode: artifact.mode,
+    mode_reason: artifact.mode_reason,
+    policy_snapshot: artifact.policy_snapshot,
+    timestamp: artifact.timestamp
+  });
   const recalculated = sha256Hex(
     canonicalJson({
       id: artifact.id,

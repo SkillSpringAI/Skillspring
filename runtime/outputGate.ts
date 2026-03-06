@@ -97,6 +97,12 @@ function bindRefusal(code: string): RefusalBinding {
     "REFUSE-INVALID-DLA": { invariant_id: "INV-032" },
     "REFUSE-INVALID-PT": { invariant_id: "INV-032" },
     "REFUSE-MISSING-DLA": { invariant_id: "INV-032" },
+    "REFUSE-MISSING-PT": { invariant_id: "INV-032" },
+    "REFUSE-LG-FAILURE-CODE-UNREGISTERED": { invariant_id: "INV-002" },
+    "REFUSE-LG-RETRY-SCOPE-MISMATCH": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-DLA-INTEGRITY": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-PT-BINDING": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-PT-EXPIRED": { invariant_id: "INV-001" }
     "REFUSE-MISSING-PT": { invariant_id: "INV-032" }
   };
 
@@ -131,6 +137,9 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
           ? "REFUSE_LG_FAILURE_CODE_UNREGISTERED"
           : code === "REFUSE-LG-RETRY-SCOPE-MISMATCH"
             ? "REFUSE_LG_RETRY_SCOPE_MISMATCH"
+            : code === "REFUSE-LUMENS-DLA-INTEGRITY" || code === "REFUSE-LUMENS-PT-BINDING" || code === "REFUSE-LUMENS-PT-EXPIRED"
+              ? "REFUSE_LUMENS_AUTHORITY"
+              : "REFUSE_UNSAFE_OR_UNKNOWN";
             : "REFUSE_UNSAFE_OR_UNKNOWN";
 
   const binding = bindRefusal(code);
@@ -286,6 +295,7 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     }
   }
 
+  return normalized;
   return out;
 }
 
