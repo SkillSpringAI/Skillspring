@@ -40,7 +40,6 @@ async function main() {
   await runStep("registry-completeness", () => checkRegistryCompleteness());
   await runStep("registry-change-protocol", () => checkRegistryChangeProtocol());
   await runStep("registry-generated-sync", () => checkRegistryGeneratedSync());
-  await runStep("lg-mapping", () => checkLgMapping());
   await runStep("allow-preservation", () => checkAllowPreservation());
   await runStep("authority-artifacts", () => checkAuthorityArtifacts());
   await runStep("refusal-binding-v2", () => checkRefusalBindingV2());

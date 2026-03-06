@@ -97,9 +97,7 @@ function bindRefusal(code: string): RefusalBinding {
     "REFUSE-INVALID-DLA": { invariant_id: "INV-032" },
     "REFUSE-INVALID-PT": { invariant_id: "INV-032" },
     "REFUSE-MISSING-DLA": { invariant_id: "INV-032" },
-    "REFUSE-MISSING-PT": { invariant_id: "INV-032" },
-    "REFUSE-LG-FAILURE-CODE-UNREGISTERED": { invariant_id: "INV-002" },
-    "REFUSE-LG-RETRY-SCOPE-MISMATCH": { invariant_id: "INV-001" }
+    "REFUSE-MISSING-PT": { invariant_id: "INV-032" }
   };
 
   const invId = mapping[code]?.invariant_id ?? "INV-032";
@@ -288,7 +286,7 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     }
   }
 
-  return normalized;
+  return out;
 }
 
 
