@@ -47,6 +47,13 @@ export type PipelineInput = {
   meta?: {
     source?: string;
     timestamp_utc?: string;
+    // diagnostics-only authority controls (must not be used in production callers)
+    authority_test_overrides?: {
+      tamper_dla_hash?: boolean;
+      tamper_pt_scope_empty?: boolean;
+      omit_dla?: boolean;
+      omit_pt?: boolean;
+    };
   };
 };
 
@@ -95,5 +102,9 @@ export type PipelineOutput =
       refusal: {
         code: string;
         message: string;
+        invariant_id?: string;
+        failure_code?: string;
+        owner?: string;
+        retry_scope?: "none" | "scoped_retry" | "artifact_rebuild";
       };
     };
