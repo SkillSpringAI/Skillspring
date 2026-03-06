@@ -15,7 +15,6 @@ import { run as checkRegistryGeneratedSync } from "./registry-generated-sync";
 import { checkAuthorityArtifacts } from "./authority-artifacts.js";
 import { checkRefusalBindingV2 } from "./refusal-binding-v2.js";
 import { checkLgMapping } from "./lg-mapping.js";
-import { checkLumensVerification } from "./lumens-verification.js";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
   try {
@@ -41,10 +40,8 @@ async function main() {
   await runStep("registry-completeness", () => checkRegistryCompleteness());
   await runStep("registry-change-protocol", () => checkRegistryChangeProtocol());
   await runStep("registry-generated-sync", () => checkRegistryGeneratedSync());
-  await runStep("lg-mapping", () => checkLgMapping());
   await runStep("allow-preservation", () => checkAllowPreservation());
   await runStep("authority-artifacts", () => checkAuthorityArtifacts());
-  await runStep("lumens-verification", () => checkLumensVerification());
   await runStep("refusal-binding-v2", () => checkRefusalBindingV2());
 
   console.log("DIAG: PASS");

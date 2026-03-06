@@ -53,9 +53,6 @@ export type PipelineInput = {
       tamper_pt_scope_empty?: boolean;
       omit_dla?: boolean;
       omit_pt?: boolean;
-      lumens_tamper_dla_payload?: boolean;
-      lumens_pt_binding_mismatch?: boolean;
-      lumens_pt_expired?: boolean;
     };
   };
 };
