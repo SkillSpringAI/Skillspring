@@ -142,6 +142,17 @@ export function validateDecisionLegitimacyArtifact(input: unknown): { ok: true }
     policy_snapshot: artifact.policy_snapshot,
     timestamp: artifact.timestamp
   });
+  const recalculated = sha256Hex(
+    canonicalJson({
+      id: artifact.id,
+      trace_id: artifact.trace_id,
+      parent_dla: artifact.parent_dla ?? null,
+      mode: artifact.mode,
+      mode_reason: artifact.mode_reason,
+      policy_snapshot: artifact.policy_snapshot,
+      timestamp: artifact.timestamp
+    })
+  );
 
   if (artifact.integrity_hash !== recalculated) {
     return { ok: false, errors: "integrity_hash mismatch" };
