@@ -3,6 +3,7 @@ import addFormats from "ajv-formats";
 import schema from "../schemas/output.schema.json";
 import type { PipelineOutput, Mode, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus } from "./types.js";
 import { loadRegistries } from "./registries/registryIndex.js";
+import { decideFromFailureCode } from "./lg.js";
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -126,7 +127,11 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
       ? "REFUSE_CAPABILITY_LEAK"
       : code === "REFUSE-OUTPUT-NOT-ADMISSIBLE"
         ? "REFUSE_SCHEMA_INVALID"
-        : "REFUSE_UNSAFE_OR_UNKNOWN";
+        : code === "REFUSE-LG-FAILURE-CODE-UNREGISTERED"
+          ? "REFUSE_LG_FAILURE_CODE_UNREGISTERED"
+          : code === "REFUSE-LG-RETRY-SCOPE-MISMATCH"
+            ? "REFUSE_LG_RETRY_SCOPE_MISMATCH"
+            : "REFUSE_UNSAFE_OR_UNKNOWN";
 
   const binding = bindRefusal(code);
 
@@ -138,6 +143,35 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
     policy: makePolicy(out, "REFUSE", decision_code),
     refusal: { code, message: ensureDatasetNote(message, out), ...binding }
   };
+}
+
+
+function enforceLegitimacyGateRefusal(out: PipelineOutput): PipelineOutput | null {
+  if (out.ok !== false) return null;
+
+  const code = out.refusal?.failure_code;
+  if (typeof code !== "string" || code.length === 0) {
+    return refusal(out, "REFUSE-LG-FAILURE-CODE-UNREGISTERED", "Legitimacy Gate missing refusal.failure_code for classification.");
+  }
+
+  try {
+    const lg = decideFromFailureCode(code);
+    if (out.refusal?.retry_scope !== lg.retry_scope) {
+      return refusal(
+        out,
+        "REFUSE-LG-RETRY-SCOPE-MISMATCH",
+        `Legitimacy Gate retry_scope mismatch for failure_code=${code}: expected ${lg.retry_scope}, got ${String(out.refusal?.retry_scope)}.`
+      );
+    }
+  } catch (err: any) {
+    return refusal(
+      out,
+      "REFUSE-LG-FAILURE-CODE-UNREGISTERED",
+      `Legitimacy Gate classification failed for failure_code=${String(code)}: ${String(err?.message ?? err)}`
+    );
+  }
+
+  return null;
 }
 
 function normalizeForScan(text: string): { loose: string; tight: string } {
@@ -231,15 +265,20 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     return refusal(normalized, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
   }
 
-  if (out.ok === true) {
-    const text = out.response?.text ?? "";
+  if (normalized.ok === false) {
+    const lgRefusal = enforceLegitimacyGateRefusal(normalized);
+    if (lgRefusal) return lgRefusal;
+  }
+
+  if (normalized.ok === true) {
+    const text = normalized.response?.text ?? "";
     if (typeof text === "string" && text.length > 0) {
       const hit = detectCapabilityLeak(text);
       if (hit) {
-        const suffixNote = extractDatasetNote(out);
+        const suffixNote = extractDatasetNote(normalized);
         const suffix = suffixNote ? ` (${suffixNote})` : "";
         return refusal(
-          out,
+          normalized,
           "REFUSE-CAPABILITY-LEAK",
           `Output contained capability-like language ("${hit}"). Refusing under output policy.${suffix}`
         );

@@ -14,6 +14,7 @@ import { run as checkAllowPreservation } from "./allow-preservation";
 import { run as checkRegistryGeneratedSync } from "./registry-generated-sync";
 import { checkAuthorityArtifacts } from "./authority-artifacts.js";
 import { checkRefusalBindingV2 } from "./refusal-binding-v2.js";
+import { checkLgMapping } from "./lg-mapping.js";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
   try {
