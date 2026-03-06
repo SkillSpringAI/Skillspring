@@ -103,7 +103,6 @@ function bindRefusal(code: string): RefusalBinding {
     "REFUSE-LUMENS-DLA-INTEGRITY": { invariant_id: "INV-001" },
     "REFUSE-LUMENS-PT-BINDING": { invariant_id: "INV-001" },
     "REFUSE-LUMENS-PT-EXPIRED": { invariant_id: "INV-001" }
-    "REFUSE-MISSING-PT": { invariant_id: "INV-032" }
   };
 
   const invId = mapping[code]?.invariant_id ?? "INV-032";
@@ -140,7 +139,6 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
             : code === "REFUSE-LUMENS-DLA-INTEGRITY" || code === "REFUSE-LUMENS-PT-BINDING" || code === "REFUSE-LUMENS-PT-EXPIRED"
               ? "REFUSE_LUMENS_AUTHORITY"
               : "REFUSE_UNSAFE_OR_UNKNOWN";
-            : "REFUSE_UNSAFE_OR_UNKNOWN";
 
   const binding = bindRefusal(code);
 
@@ -296,7 +294,6 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
   }
 
   return normalized;
-  return out;
 }
 
 

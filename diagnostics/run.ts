@@ -45,8 +45,6 @@ async function main() {
   await runStep("allow-preservation", () => checkAllowPreservation());
   await runStep("authority-artifacts", () => checkAuthorityArtifacts());
   await runStep("lumens-verification", () => checkLumensVerification());
-  await runStep("allow-preservation", () => checkAllowPreservation());
-  await runStep("authority-artifacts", () => checkAuthorityArtifacts());
   await runStep("refusal-binding-v2", () => checkRefusalBindingV2());
 
   console.log("DIAG: PASS");
