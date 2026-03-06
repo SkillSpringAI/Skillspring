@@ -3,6 +3,7 @@ import addFormats from "ajv-formats";
 import schema from "../schemas/output.schema.json";
 import type { PipelineOutput, Mode, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus } from "./types.js";
 import { loadRegistries } from "./registries/registryIndex.js";
+import { decideFromFailureCode } from "./lg.js";
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -92,7 +93,16 @@ function bindRefusal(code: string): RefusalBinding {
   // Map internal refusal codes to invariants (must exist in registries)
   const mapping: Record<string, { invariant_id: string }> = {
     "REFUSE-OUTPUT-NOT-ADMISSIBLE": { invariant_id: "INV-030" },
-    "REFUSE-CAPABILITY-LEAK": { invariant_id: "INV-031" }
+    "REFUSE-CAPABILITY-LEAK": { invariant_id: "INV-031" },
+    "REFUSE-INVALID-DLA": { invariant_id: "INV-032" },
+    "REFUSE-INVALID-PT": { invariant_id: "INV-032" },
+    "REFUSE-MISSING-DLA": { invariant_id: "INV-032" },
+    "REFUSE-MISSING-PT": { invariant_id: "INV-032" },
+    "REFUSE-LG-FAILURE-CODE-UNREGISTERED": { invariant_id: "INV-002" },
+    "REFUSE-LG-RETRY-SCOPE-MISMATCH": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-DLA-INTEGRITY": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-PT-BINDING": { invariant_id: "INV-001" },
+    "REFUSE-LUMENS-PT-EXPIRED": { invariant_id: "INV-001" }
   };
 
   const invId = mapping[code]?.invariant_id ?? "INV-032";
@@ -122,7 +132,13 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
       ? "REFUSE_CAPABILITY_LEAK"
       : code === "REFUSE-OUTPUT-NOT-ADMISSIBLE"
         ? "REFUSE_SCHEMA_INVALID"
-        : "REFUSE_UNSAFE_OR_UNKNOWN";
+        : code === "REFUSE-LG-FAILURE-CODE-UNREGISTERED"
+          ? "REFUSE_LG_FAILURE_CODE_UNREGISTERED"
+          : code === "REFUSE-LG-RETRY-SCOPE-MISMATCH"
+            ? "REFUSE_LG_RETRY_SCOPE_MISMATCH"
+            : code === "REFUSE-LUMENS-DLA-INTEGRITY" || code === "REFUSE-LUMENS-PT-BINDING" || code === "REFUSE-LUMENS-PT-EXPIRED"
+              ? "REFUSE_LUMENS_AUTHORITY"
+              : "REFUSE_UNSAFE_OR_UNKNOWN";
 
   const binding = bindRefusal(code);
 
@@ -134,6 +150,35 @@ function refusal(out: any, code: string, message: string): PipelineOutput {
     policy: makePolicy(out, "REFUSE", decision_code),
     refusal: { code, message: ensureDatasetNote(message, out), ...binding }
   };
+}
+
+
+function enforceLegitimacyGateRefusal(out: PipelineOutput): PipelineOutput | null {
+  if (out.ok !== false) return null;
+
+  const code = out.refusal?.failure_code;
+  if (typeof code !== "string" || code.length === 0) {
+    return refusal(out, "REFUSE-LG-FAILURE-CODE-UNREGISTERED", "Legitimacy Gate missing refusal.failure_code for classification.");
+  }
+
+  try {
+    const lg = decideFromFailureCode(code);
+    if (out.refusal?.retry_scope !== lg.retry_scope) {
+      return refusal(
+        out,
+        "REFUSE-LG-RETRY-SCOPE-MISMATCH",
+        `Legitimacy Gate retry_scope mismatch for failure_code=${code}: expected ${lg.retry_scope}, got ${String(out.refusal?.retry_scope)}.`
+      );
+    }
+  } catch (err: any) {
+    return refusal(
+      out,
+      "REFUSE-LG-FAILURE-CODE-UNREGISTERED",
+      `Legitimacy Gate classification failed for failure_code=${String(code)}: ${String(err?.message ?? err)}`
+    );
+  }
+
+  return null;
 }
 
 function normalizeForScan(text: string): { loose: string; tight: string } {
@@ -227,15 +272,20 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     return refusal(normalized, "REFUSE-OUTPUT-NOT-ADMISSIBLE", "Output failed admissibility schema validation. " + details);
   }
 
-  if (out.ok === true) {
-    const text = out.response?.text ?? "";
+  if (normalized.ok === false) {
+    const lgRefusal = enforceLegitimacyGateRefusal(normalized);
+    if (lgRefusal) return lgRefusal;
+  }
+
+  if (normalized.ok === true) {
+    const text = normalized.response?.text ?? "";
     if (typeof text === "string" && text.length > 0) {
       const hit = detectCapabilityLeak(text);
       if (hit) {
-        const suffixNote = extractDatasetNote(out);
+        const suffixNote = extractDatasetNote(normalized);
         const suffix = suffixNote ? ` (${suffixNote})` : "";
         return refusal(
-          out,
+          normalized,
           "REFUSE-CAPABILITY-LEAK",
           `Output contained capability-like language ("${hit}"). Refusing under output policy.${suffix}`
         );
@@ -243,7 +293,7 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
     }
   }
 
-  return out;
+  return normalized;
 }
 
 
