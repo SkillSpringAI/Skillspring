@@ -1,4 +1,4 @@
-import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
+﻿import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
@@ -240,50 +240,6 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
         retry_scope: lumensPtCheck.retry_scope
       }
     });
-      trace_id,
-      decision_code,
-      "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-      `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
-      ctx.trigger_hits ?? []
-    );
-  }
-
-  // Branch 2 (allow-only): build + validate PT only after allow path is established.
-  if (omitPt) {
-    return canonicalRefusal(
-      ctx.mode,
-      ctx.mode_reason,
-      trace_id,
-      "REFUSE_MISSING_PT",
-      "REFUSE-MISSING-PT",
-      `Permission token missing under required authority policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
-      ctx.trigger_hits ?? []
-    );
-  }
-
-  const builtPt = buildPermissionToken({
-    bound_dla_id: decisionArtifact.id,
-    allow_execution: true,
-    allow_output: true,
-    jurisdiction_scope: ["GLOBAL"],
-    retry_scope: "none"
-  });
-
-  const permissionToken = tamperPtScopeEmpty
-    ? { ...builtPt, jurisdiction_scope: [] as string[] }
-    : builtPt;
-
-  const tokenCheck = validatePermissionToken(permissionToken);
-  if (!tokenCheck.ok) {
-    return canonicalRefusal(
-      ctx.mode,
-      ctx.mode_reason,
-      trace_id,
-      "REFUSE_INVALID_PT",
-      "REFUSE-INVALID-PT",
-      `Permission token failed validation: ${tokenCheck.errors}. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
-      ctx.trigger_hits ?? []
-    );
   }
 
   const exec = await executeStub(ctx);
