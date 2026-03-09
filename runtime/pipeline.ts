@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -75,7 +75,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       "NO_TRACE_ID",
       "REFUSE_INVALID_INPUT",
       "REFUSE-INVALID-INPUT",
-      `Invalid or missing user_input. (${DATASET_VERSION_NOTE})`,
+      buildInvalidInputRefusalMessage(DATASET_VERSION_NOTE),
       []
     );
   }
@@ -266,4 +266,5 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     }
   });
 }
+
 

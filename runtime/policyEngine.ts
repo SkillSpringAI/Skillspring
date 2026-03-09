@@ -11,3 +11,7 @@ export function decideRiskRefusalDecisionCode(risk: { reconstruction_risk: boole
   if (risk.dual_use) return "REFUSE_DUAL_USE";
   return "REFUSE_POLICY_UNSPECIFIED";
 }
+
+export function buildInvalidInputRefusalMessage(datasetVersionNote: string): string {
+  return `Invalid or missing user_input. (${datasetVersionNote})`;
+}
