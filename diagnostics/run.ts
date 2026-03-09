@@ -1,4 +1,5 @@
-﻿import { checkDatasetIntegrity } from "./integrity-tests.js";
+﻿import { run as checkMnSplit } from "./mn-split";
+import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { checkEnforcementExpectations } from "./enforcement-tests.js";
 import { pipelineFailClosedDiagnostics } from "./pipeline-tests.js";
 import { checkOutputInvariants } from "./output-invariants.js";
@@ -54,3 +55,4 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
+
