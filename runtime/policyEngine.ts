@@ -35,3 +35,21 @@ export function buildMissingPtRefusalMessage(datasetVersionNote: string, modeRea
 export function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
 }
+
+export type RefusalPolicy = {
+  decision_code: string;
+  refusal_code: string;
+  message: string;
+};
+
+export function buildRiskRefusalPolicy(
+  risk: { reconstruction_risk: boolean; dual_use: boolean },
+  datasetVersionNote: string,
+  modeReasonNote: string
+): RefusalPolicy {
+  return {
+    decision_code: decideRiskRefusalDecisionCode(risk),
+    refusal_code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
+    message: buildRiskRefusalMessage(datasetVersionNote, modeReasonNote)
+  };
+}

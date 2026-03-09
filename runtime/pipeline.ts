@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -165,14 +165,14 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   }
 
   if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
-    const decision_code = decideRiskRefusalDecisionCode(ctx.risk);
+    const refusalPolicy = buildRiskRefusalPolicy(ctx.risk, DATASET_VERSION_NOTE, mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
       trace_id,
-      decision_code,
-      "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-      buildRiskRefusalMessage(DATASET_VERSION_NOTE, mode_reason_note),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       ctx.trigger_hits ?? []
     );
   }
