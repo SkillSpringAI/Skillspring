@@ -23,3 +23,7 @@ export function buildRiskRefusalMessage(datasetVersionNote: string, modeReasonNo
 export function buildMissingDlaRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Decision legitimacy artifact missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
+
+export function buildInvalidDlaRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
+  return `Decision legitimacy artifact failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
+}
