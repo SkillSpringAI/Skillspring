@@ -27,3 +27,7 @@ export function buildMissingDlaRefusalMessage(datasetVersionNote: string, modeRe
 export function buildInvalidDlaRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Decision legitimacy artifact failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
 }
+
+export function buildMissingPtRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+  return `Permission token missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
+}
