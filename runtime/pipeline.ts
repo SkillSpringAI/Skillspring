@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -172,7 +172,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       trace_id,
       decision_code,
       "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-      `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      buildRiskRefusalMessage(DATASET_VERSION_NOTE, mode_reason_note),
       ctx.trigger_hits ?? []
     );
   }

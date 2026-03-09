@@ -15,3 +15,7 @@ export function decideRiskRefusalDecisionCode(risk: { reconstruction_risk: boole
 export function buildInvalidInputRefusalMessage(datasetVersionNote: string): string {
   return `Invalid or missing user_input. (${datasetVersionNote})`;
 }
+
+export function buildRiskRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+  return `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${datasetVersionNote}; ${modeReasonNote})`;
+}
