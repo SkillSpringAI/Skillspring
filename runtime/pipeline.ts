@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -165,7 +165,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   }
 
   if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
-    const decision_code = ctx.risk.reconstruction_risk ? "REFUSE_RECONSTRUCTION_RISK" : "REFUSE_DUAL_USE";
+    const decision_code = decideRiskRefusalDecisionCode(ctx.risk);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,

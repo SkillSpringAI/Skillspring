@@ -5,3 +5,9 @@ export function decideAllowDecisionCode(mode: Mode): string {
   if (mode === "GOVERNANCE") return "ALLOW_GOVERNED_SAFE";
   return "ALLOW_ARCHITECT_SAFE";
 }
+
+export function decideRiskRefusalDecisionCode(risk: { reconstruction_risk: boolean; dual_use: boolean }): string {
+  if (risk.reconstruction_risk) return "REFUSE_RECONSTRUCTION_RISK";
+  if (risk.dual_use) return "REFUSE_DUAL_USE";
+  return "REFUSE_POLICY_UNSPECIFIED";
+}
