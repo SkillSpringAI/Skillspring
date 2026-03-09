@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -214,7 +214,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       trace_id,
       "REFUSE_INVALID_PT",
       "REFUSE-INVALID-PT",
-      `Permission token failed validation: ${tokenCheck.errors}. (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+      buildInvalidPtRefusalMessage(tokenCheck.errors, DATASET_VERSION_NOTE, mode_reason_note),
       ctx.trigger_hits ?? []
     );
   }

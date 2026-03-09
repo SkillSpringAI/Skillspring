@@ -31,3 +31,7 @@ export function buildInvalidDlaRefusalMessage(errors: string, datasetVersionNote
 export function buildMissingPtRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
+
+export function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
+  return `Permission token failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
+}
