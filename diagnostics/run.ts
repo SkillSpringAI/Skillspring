@@ -1,4 +1,6 @@
-﻿import { run as checkMnSplit } from "./mn-split";
+﻿import { run as checkClaimsEvidenceGate } from "./claims-evidence-gate";
+import { run as checkNomosOrder } from "./nomos-order";
+import { run as checkMnSplit } from "./mn-split";
 import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { checkEnforcementExpectations } from "./enforcement-tests.js";
 import { pipelineFailClosedDiagnostics } from "./pipeline-tests.js";
@@ -47,6 +49,10 @@ async function main() {
   await runStep("authority-artifacts", () => checkAuthorityArtifacts());
   await runStep("lumens-verification", () => checkLumensVerification());
   await runStep("refusal-binding-v2", () => checkRefusalBindingV2());
+
+  await runStep("nomos-order", () => checkNomosOrder());
+
+  await runStep("claims-evidence-gate", () => checkClaimsEvidenceGate());
 
   console.log("DIAG: PASS");
 }
