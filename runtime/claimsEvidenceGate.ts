@@ -12,20 +12,15 @@ export type ClaimsEvidenceResult = {
 export function evaluateClaimsEvidence(userInput: string): ClaimsEvidenceResult {
   const text = (userInput ?? "").trim();
 
-  if (!text) {
-    return {
-      evidence: [
-        { item: "User input content", status: "UNKNOWN" }
-      ]
-    };
-  }
+  const inputStatus: EvidenceStatus = text ? "PROVIDED" : "UNKNOWN";
 
-  // Minimal Phase 1 gate:
-  // Only classify directly available input evidence.
-  // Later phases can add claim extraction and evidence derivation rules.
-  return {
-    evidence: [
-      { item: "User input content", status: "PROVIDED" }
-    ]
-  };
+  // Claims–Evidence Gate v2:
+  // Build the baseline governance evidence spine.
+  const evidence: ClaimEvidenceItem[] = [
+    { item: "User input content", status: inputStatus },
+    { item: "Jurisdiction", status: "ASSUMED" },
+    { item: "Domain classification", status: "ASSUMED" }
+  ];
+
+  return { evidence };
 }

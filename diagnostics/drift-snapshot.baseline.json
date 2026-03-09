@@ -1,6 +1,6 @@
 {
-  "version": "3.4",
-  "generated_utc": "BASELINE",
+  "version": "3.3",
+  "generated_utc": "2026-03-09T04:14:59.415Z",
   "cases": [
     {
       "id": "ping_default_safe",
@@ -10,7 +10,7 @@
         "mode": "DEFAULT",
         "mode_reason": "DEFAULT_SAFE"
       },
-      "fingerprint": "8e70f9cc80351844cad66ff1"
+      "fingerprint": "5e341eb941d9a8b1b0d54e4e"
     },
     {
       "id": "safe_general",
@@ -19,7 +19,7 @@
         "ok": true,
         "mode": "DEFAULT"
       },
-      "fingerprint": "8e70f9cc80351844cad66ff1"
+      "fingerprint": "5e341eb941d9a8b1b0d54e4e"
     },
     {
       "id": "reconstruction_refuse",
@@ -38,7 +38,7 @@
         "ok": true,
         "mode": "GOVERNANCE"
       },
-      "fingerprint": "7536e333c90fda123900bcb9"
+      "fingerprint": "b7829782892be0523e0288b4"
     }
   ]
 }

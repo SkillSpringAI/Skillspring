@@ -248,8 +248,6 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   const claims = evaluateClaimsEvidence(input.user_input);
   const evidence: Array<{ item: string; status: "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE" }> = [
     ...claims.evidence,
-    { item: "Jurisdiction", status: "UNKNOWN" },
-    { item: "Domain classification", status: "ASSUMED" },
     { item: `Mode reason (${mode_reason_note})`, status: "ASSUMED" },
     { item: `Dataset versions (${DATASET_VERSION_NOTE})`, status: "PROVIDED" },
     { item: "Decision legitimacy artifact (present)", status: "PROVIDED" },
