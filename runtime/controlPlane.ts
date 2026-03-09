@@ -1,20 +1,8 @@
 ﻿import crypto from "node:crypto";
-import type { PipelineInput, ClassifiedContext, Mode, ModeReasonCode } from "./types.js";
+import type { PipelineInput, ClassifiedContext } from "./types.js";
 import { scanThreats } from "./metaNomos/threatScanner.js";
 import { classifyJurisdiction } from "./metaNomos/jurisdictionClassifier.js";
-
-function normalize(s: string): string {
-  return (s ?? "")
-    .toLowerCase()
-    .normalize("NFKC")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function hasKeyword(text: string, needles: string[]): boolean {
-  const t = normalize(text);
-  return needles.some((k) => t.includes(normalize(k)));
-}
+import { decideModeOrdered } from "./metaNomos/modeDecision.js";
 
 export function makeTraceId(userInput: string): string {
   const h = crypto.createHash("sha256").update(String(userInput)).digest("hex");
@@ -29,24 +17,14 @@ export function classify(input: PipelineInput): ClassifiedContext {
   const jurisdiction = classifyJurisdiction(text);
   const threat = scanThreats(text);
 
-  let mode: Mode = "DEFAULT";
-  if (threat.rights_impact || threat.dual_use || threat.reconstruction_risk) mode = "GOVERNANCE";
-  if (threat.architect_hint) mode = "ARCHITECT";
-
-  const reason_code: ModeReasonCode =
-    threat.architect_hint
-      ? "ARCHITECT_KEYWORDS"
-      : threat.reconstruction_risk
-        ? "RECONSTRUCTION_RISK"
-        : threat.dual_use
-          ? "DUAL_USE"
-          : threat.rights_impact
-            ? "RIGHTS_IMPACT"
-            : "DEFAULT_SAFE";
+  // NOMOS-ORDER-01:
+  // Mode decision is derived only after threat scanning is complete,
+  // with explicit ordered precedence.
+  const ordered = decideModeOrdered(threat);
 
   return {
-    mode,
-    mode_reason: reason_code,
+    mode: ordered.mode,
+    mode_reason: ordered.mode_reason,
     domain_hints: [],
     trigger_hits: threat.trigger_hits,
     jurisdiction,
