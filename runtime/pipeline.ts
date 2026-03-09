@@ -1,4 +1,5 @@
-﻿import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
+﻿import { decideAllowDecisionCode } from "./policyEngine.js";
+import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
@@ -91,9 +92,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   const lumensTamperDlaPayload = testOverrides?.lumens_tamper_dla_payload === true;
   const lumensPtBindingMismatch = testOverrides?.lumens_pt_binding_mismatch === true;
   const lumensPtExpired = testOverrides?.lumens_pt_expired === true;
-
-  const baseDecisionCode =
-    ctx.mode === "DEFAULT" ? "ALLOW_DEFAULT_SAFE" : ctx.mode === "GOVERNANCE" ? "ALLOW_GOVERNED_SAFE" : "ALLOW_ARCHITECT_SAFE";
+  const baseDecisionCode = decideAllowDecisionCode(ctx.mode);
 
   // Branch 1 (always): build + validate DLA before any output emission.
   if (omitDla) {
