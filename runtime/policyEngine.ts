@@ -19,3 +19,7 @@ export function buildInvalidInputRefusalMessage(datasetVersionNote: string): str
 export function buildRiskRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
+
+export function buildMissingDlaRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+  return `Decision legitimacy artifact missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
+}
