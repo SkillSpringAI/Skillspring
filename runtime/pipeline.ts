@@ -1,4 +1,5 @@
-﻿import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
+﻿import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
+import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
 import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
@@ -244,8 +245,9 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   const exec = await executeStub(ctx);
 
+  const claims = evaluateClaimsEvidence(input.user_input);
   const evidence: Array<{ item: string; status: "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE" }> = [
-    { item: "User input content", status: "PROVIDED" },
+    ...claims.evidence,
     { item: "Jurisdiction", status: "UNKNOWN" },
     { item: "Domain classification", status: "ASSUMED" },
     { item: `Mode reason (${mode_reason_note})`, status: "ASSUMED" },
@@ -267,3 +269,4 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     }
   });
 }
+
