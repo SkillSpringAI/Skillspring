@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -69,13 +69,14 @@ function canonicalRefusal(
 export async function runGovernedPipeline(input: PipelineInput): Promise<PipelineOutput> {
   if (!input || typeof input.user_input !== "string" || input.user_input.trim() === "") {
     const mode_reason: ModeReasonCode = "DEFAULT_SAFE";
+    const refusalPolicy = buildInvalidInputRefusalPolicy(DATASET_VERSION_NOTE);
     return canonicalRefusal(
       "GOVERNANCE",
       mode_reason,
       "NO_TRACE_ID",
-      "REFUSE_INVALID_INPUT",
-      "REFUSE-INVALID-INPUT",
-      buildInvalidInputRefusalMessage(DATASET_VERSION_NOTE),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       []
     );
   }

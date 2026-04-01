@@ -53,3 +53,11 @@ export function buildRiskRefusalPolicy(
     message: buildRiskRefusalMessage(datasetVersionNote, modeReasonNote)
   };
 }
+
+export function buildInvalidInputRefusalPolicy(datasetVersionNote: string): RefusalPolicy {
+  return {
+    decision_code: "REFUSE_INVALID_INPUT",
+    refusal_code: "REFUSE-INVALID-INPUT",
+    message: buildInvalidInputRefusalMessage(datasetVersionNote)
+  };
+}
