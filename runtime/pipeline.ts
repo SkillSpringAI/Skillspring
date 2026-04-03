@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy, buildInvalidDlaRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -126,13 +126,14 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   const artifactCheck = validateDecisionLegitimacyArtifact(decisionArtifact);
   if (!artifactCheck.ok) {
+    const refusalPolicy = buildInvalidDlaRefusalPolicy(artifactCheck.errors, DATASET_VERSION_NOTE, mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
       trace_id,
-      "REFUSE_INVALID_DLA",
-      "REFUSE-INVALID-DLA",
-      buildInvalidDlaRefusalMessage(artifactCheck.errors, DATASET_VERSION_NOTE, mode_reason_note),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       ctx.trigger_hits ?? []
     );
   }

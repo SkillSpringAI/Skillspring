@@ -69,3 +69,11 @@ export function buildMissingDlaRefusalPolicy(datasetVersionNote: string, modeRea
     message: buildMissingDlaRefusalMessage(datasetVersionNote, modeReasonNote)
   };
 }
+
+export function buildInvalidDlaRefusalPolicy(errors: string, datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
+  return {
+    decision_code: "REFUSE_INVALID_DLA",
+    refusal_code: "REFUSE-INVALID-DLA",
+    message: buildInvalidDlaRefusalMessage(errors, datasetVersionNote, modeReasonNote)
+  };
+}
