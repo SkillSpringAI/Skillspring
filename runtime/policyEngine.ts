@@ -61,3 +61,11 @@ export function buildInvalidInputRefusalPolicy(datasetVersionNote: string): Refu
     message: buildInvalidInputRefusalMessage(datasetVersionNote)
   };
 }
+
+export function buildMissingDlaRefusalPolicy(datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
+  return {
+    decision_code: "REFUSE_MISSING_DLA",
+    refusal_code: "REFUSE-MISSING-DLA",
+    message: buildMissingDlaRefusalMessage(datasetVersionNote, modeReasonNote)
+  };
+}

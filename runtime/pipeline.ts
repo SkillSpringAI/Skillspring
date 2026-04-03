@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy } from "./policyEngine.js";
+﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -97,13 +97,14 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   // Branch 1 (always): build + validate DLA before any output emission.
   if (omitDla) {
+    const refusalPolicy = buildMissingDlaRefusalPolicy(DATASET_VERSION_NOTE, mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
       trace_id,
-      "REFUSE_MISSING_DLA",
-      "REFUSE-MISSING-DLA",
-      buildMissingDlaRefusalMessage(DATASET_VERSION_NOTE, mode_reason_note),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       ctx.trigger_hits ?? []
     );
   }
