@@ -12,23 +12,23 @@ export function decideRiskRefusalDecisionCode(risk: { reconstruction_risk: boole
   return "REFUSE_POLICY_UNSPECIFIED";
 }
 
-export function buildInvalidInputRefusalMessage(datasetVersionNote: string): string {
+function buildInvalidInputRefusalMessage(datasetVersionNote: string): string {
   return `Invalid or missing user_input. (${datasetVersionNote})`;
 }
 
-export function buildRiskRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+function buildRiskRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Request appears dual-use or reconstruction-risk. Refusing under governance policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
-export function buildMissingDlaRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+function buildMissingDlaRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Decision legitimacy artifact missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
-export function buildInvalidDlaRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
+function buildInvalidDlaRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Decision legitimacy artifact failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
-export function buildMissingPtRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
+function buildMissingPtRefusalMessage(datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
@@ -40,7 +40,7 @@ export function buildMissingPtRefusalPolicy(datasetVersionNote: string, modeReas
   };
 }
 
-export function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
+function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
@@ -57,6 +57,24 @@ export type RefusalPolicy = {
   refusal_code: string;
   message: string;
 };
+
+export type AllowPolicy = {
+  decision_code: string;
+};
+
+export function buildAllowPolicy(mode: Mode): AllowPolicy {
+  return {
+    decision_code: decideAllowDecisionCode(mode)
+  };
+}
+
+export function buildPolicySnapshotDecisionCode(
+  risk: { reconstruction_risk: boolean; dual_use: boolean },
+  mode: Mode
+): string {
+  if (risk.dual_use || risk.reconstruction_risk) return decideRiskRefusalDecisionCode(risk);
+  return decideAllowDecisionCode(mode);
+}
 
 export function buildRiskRefusalPolicy(
   risk: { reconstruction_risk: boolean; dual_use: boolean },

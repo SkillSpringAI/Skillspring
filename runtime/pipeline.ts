@@ -1,4 +1,4 @@
-import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildMissingPtRefusalPolicy, buildInvalidPtRefusalPolicy, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy, buildInvalidDlaRefusalPolicy } from "./policyEngine.js";
+import { buildPolicySnapshotDecisionCode, buildAllowPolicy, buildMissingPtRefusalPolicy, buildInvalidPtRefusalPolicy, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy, buildInvalidDlaRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -93,7 +93,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   const lumensTamperDlaPayload = testOverrides?.lumens_tamper_dla_payload === true;
   const lumensPtBindingMismatch = testOverrides?.lumens_pt_binding_mismatch === true;
   const lumensPtExpired = testOverrides?.lumens_pt_expired === true;
-  const baseDecisionCode = decideAllowDecisionCode(ctx.mode);
+  const allowPolicy = buildAllowPolicy(ctx.mode);
 
   // Branch 1 (always): build + validate DLA before any output emission.
   if (omitDla) {
@@ -115,7 +115,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     mode_reason: ctx.mode_reason,
     policy_snapshot: {
       decision: ctx.risk.dual_use || ctx.risk.reconstruction_risk ? "REFUSE" : "ALLOW",
-      decision_code: ctx.risk.dual_use || ctx.risk.reconstruction_risk ? "REFUSE_DUAL_USE_OR_RECONSTRUCTION" : baseDecisionCode,
+      decision_code: buildPolicySnapshotDecisionCode(ctx.risk, ctx.mode),
       mode_reason: ctx.mode_reason
     }
   });
@@ -264,7 +264,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     mode: ctx.mode,
     mode_reason: ctx.mode_reason,
     trace_id,
-    policy: makePolicy("ALLOW", baseDecisionCode, ctx.mode_reason, evidence, ctx.trigger_hits ?? []),
+    policy: makePolicy("ALLOW", allowPolicy.decision_code, ctx.mode_reason, evidence, ctx.trigger_hits ?? []),
     evidence,
     response: {
       type: "SAFE_STUB",
