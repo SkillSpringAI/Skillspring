@@ -33,30 +33,41 @@ function buildMissingPtRefusalMessage(datasetVersionNote: string, modeReasonNote
 }
 
 export function buildMissingPtRefusalPolicy(datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
-  return {
-    decision_code: "REFUSE_MISSING_PT",
-    refusal_code: "REFUSE-MISSING-PT",
-    message: buildMissingPtRefusalMessage(datasetVersionNote, modeReasonNote)
-  };
+  return makeRefusalPolicy(
+    "REFUSE_MISSING_PT",
+    "REFUSE-MISSING-PT",
+    buildMissingPtRefusalMessage(datasetVersionNote, modeReasonNote)
+  );
 }
+
 
 function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
 export function buildInvalidPtRefusalPolicy(errors: string, datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
-  return {
-    decision_code: "REFUSE_INVALID_PT",
-    refusal_code: "REFUSE-INVALID-PT",
-    message: buildInvalidPtRefusalMessage(errors, datasetVersionNote, modeReasonNote)
-  };
+  return makeRefusalPolicy(
+    "REFUSE_INVALID_PT",
+    "REFUSE-INVALID-PT",
+    buildInvalidPtRefusalMessage(errors, datasetVersionNote, modeReasonNote)
+  );
 }
+
 
 export type RefusalPolicy = {
   decision_code: string;
   refusal_code: string;
   message: string;
 };
+
+function makeRefusalPolicy(decision_code: string, refusal_code: string, message: string): RefusalPolicy {
+  return {
+    decision_code,
+    refusal_code,
+    message
+  };
+}
+
 
 export type AllowPolicy = {
   decision_code: string;
@@ -81,33 +92,39 @@ export function buildRiskRefusalPolicy(
   datasetVersionNote: string,
   modeReasonNote: string
 ): RefusalPolicy {
-  return {
-    decision_code: decideRiskRefusalDecisionCode(risk),
-    refusal_code: "REFUSE-DUALUSE-OR-RECONSTRUCTION",
-    message: buildRiskRefusalMessage(datasetVersionNote, modeReasonNote)
-  };
+  return makeRefusalPolicy(
+    decideRiskRefusalDecisionCode(risk),
+    "REFUSE-DUALUSE-OR-RECONSTRUCTION",
+    buildRiskRefusalMessage(datasetVersionNote, modeReasonNote)
+  );
 }
+
+
 
 export function buildInvalidInputRefusalPolicy(datasetVersionNote: string): RefusalPolicy {
-  return {
-    decision_code: "REFUSE_INVALID_INPUT",
-    refusal_code: "REFUSE-INVALID-INPUT",
-    message: buildInvalidInputRefusalMessage(datasetVersionNote)
-  };
+  return makeRefusalPolicy(
+    "REFUSE_INVALID_INPUT",
+    "REFUSE-INVALID-INPUT",
+    buildInvalidInputRefusalMessage(datasetVersionNote)
+  );
 }
 
+
+
 export function buildMissingDlaRefusalPolicy(datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
-  return {
-    decision_code: "REFUSE_MISSING_DLA",
-    refusal_code: "REFUSE-MISSING-DLA",
-    message: buildMissingDlaRefusalMessage(datasetVersionNote, modeReasonNote)
-  };
+  return makeRefusalPolicy(
+    "REFUSE_MISSING_DLA",
+    "REFUSE-MISSING-DLA",
+    buildMissingDlaRefusalMessage(datasetVersionNote, modeReasonNote)
+  );
 }
 
 export function buildInvalidDlaRefusalPolicy(errors: string, datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
-  return {
-    decision_code: "REFUSE_INVALID_DLA",
-    refusal_code: "REFUSE-INVALID-DLA",
-    message: buildInvalidDlaRefusalMessage(errors, datasetVersionNote, modeReasonNote)
-  };
+  return makeRefusalPolicy(
+    "REFUSE_INVALID_DLA",
+    "REFUSE-INVALID-DLA",
+    buildInvalidDlaRefusalMessage(errors, datasetVersionNote, modeReasonNote)
+  );
 }
+
+
