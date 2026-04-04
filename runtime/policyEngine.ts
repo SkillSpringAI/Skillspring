@@ -1,4 +1,4 @@
-﻿import type { Mode } from "./types.js";
+import type { Mode } from "./types.js";
 
 export function decideAllowDecisionCode(mode: Mode): string {
   if (mode === "DEFAULT") return "ALLOW_DEFAULT_SAFE";
@@ -32,8 +32,24 @@ export function buildMissingPtRefusalMessage(datasetVersionNote: string, modeRea
   return `Permission token missing under required authority policy. (${datasetVersionNote}; ${modeReasonNote})`;
 }
 
+export function buildMissingPtRefusalPolicy(datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
+  return {
+    decision_code: "REFUSE_MISSING_PT",
+    refusal_code: "REFUSE-MISSING-PT",
+    message: buildMissingPtRefusalMessage(datasetVersionNote, modeReasonNote)
+  };
+}
+
 export function buildInvalidPtRefusalMessage(errors: string, datasetVersionNote: string, modeReasonNote: string): string {
   return `Permission token failed validation: ${errors}. (${datasetVersionNote}; ${modeReasonNote})`;
+}
+
+export function buildInvalidPtRefusalPolicy(errors: string, datasetVersionNote: string, modeReasonNote: string): RefusalPolicy {
+  return {
+    decision_code: "REFUSE_INVALID_PT",
+    refusal_code: "REFUSE-INVALID-PT",
+    message: buildInvalidPtRefusalMessage(errors, datasetVersionNote, modeReasonNote)
+  };
 }
 
 export type RefusalPolicy = {

@@ -1,4 +1,4 @@
-﻿import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildInvalidPtRefusalMessage, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy, buildInvalidDlaRefusalPolicy } from "./policyEngine.js";
+import { decideAllowDecisionCode, decideRiskRefusalDecisionCode, buildInvalidInputRefusalMessage, buildRiskRefusalMessage, buildMissingDlaRefusalMessage, buildInvalidDlaRefusalMessage, buildMissingPtRefusalMessage, buildMissingPtRefusalPolicy, buildInvalidPtRefusalMessage, buildInvalidPtRefusalPolicy, buildRiskRefusalPolicy, buildInvalidInputRefusalPolicy, buildMissingDlaRefusalPolicy, buildInvalidDlaRefusalPolicy } from "./policyEngine.js";
 import { evaluateClaimsEvidence } from "./claimsEvidenceGate.js";
 import type {PipelineInput, PipelineOutput, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus, TriggerHit } from "./types.js";
 import { classify, makeTraceId } from "./controlPlane.js";
@@ -182,17 +182,18 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   // Branch 2 (allow-only): build + validate PT only after allow path is established.
   if (omitPt) {
+    const refusalPolicy = buildMissingPtRefusalPolicy(DATASET_VERSION_NOTE, mode_reason_note);
+
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
       trace_id,
-      "REFUSE_MISSING_PT",
-      "REFUSE-MISSING-PT",
-      buildMissingPtRefusalMessage(DATASET_VERSION_NOTE, mode_reason_note),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       ctx.trigger_hits ?? []
     );
   }
-
   const builtPt = buildPermissionToken({
     bound_dla_id: decisionArtifact.id,
     allow_execution: true,
@@ -211,13 +212,15 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   const tokenCheck = validatePermissionToken(permissionToken);
   if (!tokenCheck.ok) {
+    const refusalPolicy = buildInvalidPtRefusalPolicy(tokenCheck.errors, DATASET_VERSION_NOTE, mode_reason_note);
+
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
       trace_id,
-      "REFUSE_INVALID_PT",
-      "REFUSE-INVALID-PT",
-      buildInvalidPtRefusalMessage(tokenCheck.errors, DATASET_VERSION_NOTE, mode_reason_note),
+      refusalPolicy.decision_code,
+      refusalPolicy.refusal_code,
+      refusalPolicy.message,
       ctx.trigger_hits ?? []
     );
   }
@@ -269,5 +272,8 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
     }
   });
 }
+
+
+
 
 
