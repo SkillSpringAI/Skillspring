@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/evaluate-request.v1.json",
+  "title": "SkillSpring v1 evaluation request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "user_input"],
+  "properties": {
+    "schema_version": { "const": "skillspring.evaluate.request.v1" },
+    "user_input": { "type": "string", "minLength": 1, "maxLength": 16384, "pattern": "\\S" }
+  }
+}

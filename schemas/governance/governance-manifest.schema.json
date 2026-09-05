@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/governance-manifest.v1.json",
+  "title": "SkillSpring Governance Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "manifest_id", "constitution", "registries", "schemas", "datasets"],
+  "properties": {
+    "schema_version": { "const": "skillspring.governance-manifest.v1" },
+    "manifest_id": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "constitution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "hash"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    },
+    "registries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["triggers", "modes", "cycles", "invariants", "failure_codes", "decision_codes"],
+      "properties": {
+        "triggers": { "$ref": "#/$defs/versionedHash" },
+        "modes": { "$ref": "#/$defs/versionedHash" },
+        "cycles": { "$ref": "#/$defs/versionedHash" },
+        "invariants": { "$ref": "#/$defs/versionedHash" },
+        "failure_codes": { "$ref": "#/$defs/versionedHash" },
+        "decision_codes": { "$ref": "#/$defs/versionedHash" }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output", "output_admissibility", "dla", "permission_token", "execution_authority", "evaluate_request", "evaluate_response", "generated_answer_candidate"],
+      "properties": {
+        "generated_answer_candidate": { "$ref": "#/$defs/versionedHash" },
+        "evaluate_request": { "$ref": "#/$defs/versionedHash" },
+        "evaluate_response": { "$ref": "#/$defs/versionedHash" },
+        "output": { "$ref": "#/$defs/versionedHash" },
+        "output_admissibility": { "$ref": "#/$defs/versionedHash" },
+        "dla": { "$ref": "#/$defs/versionedHash" },
+        "permission_token": { "$ref": "#/$defs/versionedHash" }
+        ,"execution_authority": { "$ref": "#/$defs/versionedHash" }
+      }
+    },
+    "datasets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dual_use", "reconstruction"],
+      "properties": {
+        "dual_use": { "$ref": "#/$defs/versionedHash" },
+        "reconstruction": { "$ref": "#/$defs/versionedHash" }
+      }
+    }
+  },
+  "$defs": {
+    "versionedHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "hash"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

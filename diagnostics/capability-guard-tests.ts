@@ -14,6 +14,7 @@ export function checkCapabilityGuard(): void {
     policy: {
       decision: "ALLOW",
       decision_code: "ALLOW_DEFAULT_SAFE",
+      governance_manifest_id: "sha256:" + "0".repeat(64),
       mode_reason: "DEFAULT_SAFE",
       dataset_versions: { dual_use: "v1", reconstruction: "v1" },
       trigger_hits: [],

@@ -7,8 +7,7 @@ import { executeStub } from "./executionPlane.js";
 import { assertAdmissible } from "./outputGate.js";
 import { buildDecisionLegitimacyArtifact, buildPermissionToken, validateDecisionLegitimacyArtifact, validatePermissionToken } from "./authority/artifacts.js";
 import { verifyAuthority } from "./lumens.js";
-
-const DATASET_VERSION_NOTE = "datasets: dual-use=v1; reconstruction=v1";
+import { datasetVersionNote } from "./governance.js";
 
 
 
@@ -37,7 +36,7 @@ function canonicalRefusal(
 export async function runGovernedPipeline(input: PipelineInput): Promise<PipelineOutput> {
   if (!input || typeof input.user_input !== "string" || input.user_input.trim() === "") {
     const mode_reason: ModeReasonCode = "DEFAULT_SAFE";
-    const refusalPolicy = buildInvalidInputRefusalPolicy(DATASET_VERSION_NOTE);
+    const refusalPolicy = buildInvalidInputRefusalPolicy(datasetVersionNote());
     return canonicalRefusal(
       "GOVERNANCE",
       mode_reason,
@@ -65,7 +64,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   // Branch 1 (always): build + validate DLA before any output emission.
   if (omitDla) {
-    const refusalPolicy = buildMissingDlaRefusalPolicy(DATASET_VERSION_NOTE, mode_reason_note);
+    const refusalPolicy = buildMissingDlaRefusalPolicy(datasetVersionNote(), mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
@@ -94,7 +93,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   const artifactCheck = validateDecisionLegitimacyArtifact(decisionArtifact);
   if (!artifactCheck.ok) {
-    const refusalPolicy = buildInvalidDlaRefusalPolicy(artifactCheck.errors, DATASET_VERSION_NOTE, mode_reason_note);
+    const refusalPolicy = buildInvalidDlaRefusalPolicy(artifactCheck.errors, datasetVersionNote(), mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
@@ -126,7 +125,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       policy: makePolicy("REFUSE", "REFUSE_LUMENS_AUTHORITY", ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
       refusal: {
         code: lumensDlaCheck.code,
-        message: `${lumensDlaCheck.message} (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+        message: `${lumensDlaCheck.message} (${datasetVersionNote()}; ${mode_reason_note})`,
         invariant_id: lumensDlaCheck.invariant_id,
         failure_code: lumensDlaCheck.failure_code,
         owner: lumensDlaCheck.owner,
@@ -136,7 +135,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   }
 
   if (ctx.risk.dual_use || ctx.risk.reconstruction_risk) {
-    const refusalPolicy = buildRiskRefusalPolicy(ctx.risk, DATASET_VERSION_NOTE, mode_reason_note);
+    const refusalPolicy = buildRiskRefusalPolicy(ctx.risk, datasetVersionNote(), mode_reason_note);
     return canonicalRefusal(
       ctx.mode,
       ctx.mode_reason,
@@ -150,7 +149,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   // Branch 2 (allow-only): build + validate PT only after allow path is established.
   if (omitPt) {
-    const refusalPolicy = buildMissingPtRefusalPolicy(DATASET_VERSION_NOTE, mode_reason_note);
+    const refusalPolicy = buildMissingPtRefusalPolicy(datasetVersionNote(), mode_reason_note);
 
     return canonicalRefusal(
       ctx.mode,
@@ -180,7 +179,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
 
   const tokenCheck = validatePermissionToken(permissionToken);
   if (!tokenCheck.ok) {
-    const refusalPolicy = buildInvalidPtRefusalPolicy(tokenCheck.errors, DATASET_VERSION_NOTE, mode_reason_note);
+    const refusalPolicy = buildInvalidPtRefusalPolicy(tokenCheck.errors, datasetVersionNote(), mode_reason_note);
 
     return canonicalRefusal(
       ctx.mode,
@@ -207,7 +206,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
       policy: makePolicy("REFUSE", "REFUSE_LUMENS_AUTHORITY", ctx.mode_reason, undefined, ctx.trigger_hits ?? []),
       refusal: {
         code: lumensPtCheck.code,
-        message: `${lumensPtCheck.message} (${DATASET_VERSION_NOTE}; ${mode_reason_note})`,
+        message: `${lumensPtCheck.message} (${datasetVersionNote()}; ${mode_reason_note})`,
         invariant_id: lumensPtCheck.invariant_id,
         failure_code: lumensPtCheck.failure_code,
         owner: lumensPtCheck.owner,
@@ -222,7 +221,7 @@ export async function runGovernedPipeline(input: PipelineInput): Promise<Pipelin
   const evidence: Array<{ item: string; status: "PROVIDED" | "ASSUMED" | "UNKNOWN" | "ESTIMATE" }> = [
     ...claims.evidence,
     { item: `Mode reason (${mode_reason_note})`, status: "ASSUMED" },
-    { item: `Dataset versions (${DATASET_VERSION_NOTE})`, status: "PROVIDED" },
+    { item: `Dataset versions (${datasetVersionNote()})`, status: "PROVIDED" },
     { item: "Decision legitimacy artifact (present)", status: "PROVIDED" },
     { item: "Permission token (present)", status: "PROVIDED" }
   ];

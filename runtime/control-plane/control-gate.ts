@@ -2,7 +2,6 @@ import { ControlContext, ControlDecision } from "./control-plane.types.js";
 import { routeMode } from "./mode-router.js";
 import { resolveJurisdiction } from "./jurisdiction-resolver.js";
 import { checkAuthority } from "./authority-check.js";
-import { ExecutionPlan } from "../execution-plane/execution-plan.types.js";
 
 /**
  * Control Gate
@@ -13,7 +12,7 @@ import { ExecutionPlan } from "../execution-plane/execution-plan.types.js";
  *
  * No downstream execution is permitted without an ExecutionPlan.
  */
-export function controlGate(context: ControlContext): ControlDecision | ExecutionPlan {
+export function controlGate(context: ControlContext): ControlDecision {
   // 1) Authority boundary check (hard stop)
   const auth = checkAuthority(context);
   if (auth.status !== "allow") return auth;
@@ -26,10 +25,9 @@ export function controlGate(context: ControlContext): ControlDecision | Executio
   const modeDecision = routeMode(context);
   if (modeDecision.status !== "allow") return modeDecision;
 
-  // 4) Final allow: construct minimal plan
+  // 4) No plan is issued until action-bound execution authority exists.
   return {
-    mode: modeDecision.mode,
-    domain: context.domain as string,
-    jurisdiction: context.jurisdiction as string
+    status: "refuse",
+    reason: `Execution authority is not issued by the current inert runtime (mode=${modeDecision.mode}).`
   };
 }

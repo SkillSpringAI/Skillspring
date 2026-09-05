@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/draft-policy-request.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actor",
+    "mode",
+    "domain",
+    "resource",
+    "operation",
+    "purpose",
+    "environment",
+    "organization",
+    "policy_digest"
+  ],
+  "properties": {
+    "actor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "mode": {
+      "enum": [
+        "DEFAULT",
+        "GOVERNANCE",
+        "ARCHITECT"
+      ]
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "resource": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operation": {
+      "enum": [
+        "read",
+        "request_review",
+        "test",
+        "debug",
+        "propose_change",
+        "review_evidence",
+        "review_release"
+      ]
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "organization": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}

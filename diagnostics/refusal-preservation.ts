@@ -16,6 +16,7 @@ export async function run() {
     policy: {
       decision: "REFUSE",
       decision_code: "REFUSE_RECONSTRUCTION",
+      governance_manifest_id: "sha256:" + "0".repeat(64),
       mode_reason: "RECONSTRUCTION_RISK",
       dataset_versions: { dual_use: "v-test", reconstruction: "v-test" },
       trigger_hits: [],

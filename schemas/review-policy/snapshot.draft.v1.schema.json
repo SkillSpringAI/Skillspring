@@ -1,0 +1,429 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/draft-policy-snapshot.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "organization",
+    "policy_digest",
+    "issued_at",
+    "expires_at",
+    "principals",
+    "resources",
+    "clearances",
+    "issuerMandates",
+    "denials"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "skillspring.policy-snapshot.draft.v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "organization": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "issued_at": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expires_at": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "principals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "roles",
+          "domains"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "user",
+                "domain_reviewer",
+                "governance_officer",
+                "engineering_maintainer",
+                "access_administrator"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          }
+        }
+      },
+      "maxItems": 256
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "domain",
+          "classification",
+          "environment"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "classification": {
+            "enum": [
+              "public",
+              "domain_restricted",
+              "engineering_sandbox",
+              "protected"
+            ]
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        }
+      },
+      "maxItems": 256
+    },
+    "clearances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "subject",
+          "role",
+          "issuer",
+          "domain",
+          "modes",
+          "resources",
+          "operations",
+          "issuedAt",
+          "expiresAt",
+          "revoked",
+          "purposes",
+          "environments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "role": {
+            "enum": [
+              "user",
+              "domain_reviewer",
+              "governance_officer",
+              "engineering_maintainer",
+              "access_administrator"
+            ]
+          },
+          "issuer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "DEFAULT",
+                "GOVERNANCE",
+                "ARCHITECT"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "read",
+                "request_review",
+                "test",
+                "debug",
+                "propose_change",
+                "review_evidence",
+                "review_release"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "issuedAt": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expiresAt": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          }
+        }
+      },
+      "maxItems": 256
+    },
+    "issuerMandates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "issuer",
+          "domains",
+          "roles",
+          "modes"
+        ],
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "user",
+                "domain_reviewer",
+                "governance_officer",
+                "engineering_maintainer",
+                "access_administrator"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "DEFAULT",
+                "GOVERNANCE",
+                "ARCHITECT"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          }
+        }
+      },
+      "maxItems": 256
+    },
+    "denials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "actors",
+          "domains",
+          "resources",
+          "modes",
+          "operations",
+          "purposes",
+          "environments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "actors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "DEFAULT",
+                "GOVERNANCE",
+                "ARCHITECT"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "read",
+                "request_review",
+                "test",
+                "debug",
+                "propose_change",
+                "review_evidence",
+                "review_release"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          }
+        }
+      },
+      "maxItems": 256
+    }
+  }
+}

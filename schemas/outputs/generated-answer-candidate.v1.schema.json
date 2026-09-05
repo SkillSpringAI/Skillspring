@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/generated-answer-candidate.v1.json",
+  "title": "Generated answer candidate v1 (not release authority)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "trace_id", "governance_manifest_id", "provenance", "answer", "evidence", "review", "release_authorized"],
+  "properties": {
+    "schema_version": { "const": "skillspring.generated-answer-candidate.v1" },
+    "kind": { "const": "GENERATED_ANSWER_CANDIDATE" },
+    "trace_id": { "type": "string", "minLength": 8, "maxLength": 128 },
+    "governance_manifest_id": { "$ref": "#/definitions/hash" },
+    "release_authorized": { "const": false },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provider", "source_region", "inference_profile_id", "request_id", "completed_at", "stop_reason", "prompt_sha256", "answer_sha256"],
+      "properties": {
+        "provider": { "const": "AWS_BEDROCK" },
+        "source_region": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "inference_profile_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "request_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "stop_reason": { "const": "end_turn" },
+        "prompt_sha256": { "$ref": "#/definitions/hash" },
+        "answer_sha256": { "$ref": "#/definitions/hash" }
+      }
+    },
+    "answer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["text", "purpose"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 16384, "pattern": "\\S" },
+        "purpose": { "const": "INFORMATIONAL_DRAFT" }
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["verification", "source_refs"],
+      "properties": {
+        "verification": { "const": "UNVERIFIED" },
+        "source_refs": {
+          "type": "array", "maxItems": 32, "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["source_id", "content_sha256"],
+            "properties": {
+              "source_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "content_sha256": { "$ref": "#/definitions/hash" }
+            }
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authority_claims", "output_admissibility"],
+      "properties": {
+        "authority_claims": { "const": "PENDING" },
+        "output_admissibility": { "const": "PENDING" }
+      }
+    }
+  },
+  "definitions": {
+    "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

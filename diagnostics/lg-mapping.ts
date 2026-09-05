@@ -12,6 +12,7 @@ function refusalFixture(overrides?: Partial<Extract<PipelineOutput, { ok: false 
     policy: {
       decision: "REFUSE",
       decision_code: "REFUSE_DIAG_CASE",
+      governance_manifest_id: "sha256:" + "0".repeat(64),
       mode_reason: "DEFAULT_SAFE",
       dataset_versions: { dual_use: "v2", reconstruction: "v2" },
       trigger_hits: [],

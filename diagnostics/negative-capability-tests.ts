@@ -52,6 +52,10 @@ function fileContainsForbiddenImport(path: string, content: string): string | nu
 
     if (!isImportLine) continue;
 
+    // Approved local listener only: no default, namespace, client, or core imports.
+    if (path.replace(/\\/g, "/") === "src/http-server.ts" &&
+        line === 'import { createServer } from "node:http";') continue;
+
     const hit = FORBIDDEN_IMPORTS.find((m) => line.includes(`"${m}"`) || line.includes(`'${m}'`));
     if (hit) return `${hit} (line ${i + 1})`;
   }
@@ -60,6 +64,13 @@ function fileContainsForbiddenImport(path: string, content: string): string | nu
 }
 
 export function checkNegativeCapabilities(): void {
+  must(!fileContainsForbiddenImport("src/http-server.ts", 'import { createServer } from "node:http";'), "local server exception missing");
+  for (const [file, source] of [
+    ["runtime/api/evaluate.ts", 'import { createServer } from "node:http";'],
+    ["src/http-server.ts", 'import { request } from "node:http";'],
+    ["src/http-server.ts", 'import http from "node:http";'],
+    ["src/serve.ts", 'import { createServer } from "node:http";']
+  ]) must(fileContainsForbiddenImport(file, source), "network exception expanded beyond the local listener");
   for (const d of SCAN_DIRS) {
     const files = listFiles(d).filter((p) => p.endsWith(".ts"));
     for (const f of files) {

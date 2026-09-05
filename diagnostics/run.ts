@@ -1,5 +1,14 @@
 ﻿import { run as checkClaimsEvidenceGate } from "./claims-evidence-gate";
 import { run as checkNomosOrder } from "./nomos-order";
+import { checkEvaluationApi } from "./evaluation-api.js";
+import { checkHttpEvaluation } from "./http-evaluation.js";
+import { checkBedrockClient } from "./bedrock-client.js";
+import { checkModelIntegration } from "./model-integration.js";
+import { checkAnswerCandidate } from "./answer-candidate.js";
+import { checkLiveCandidateAdapter } from "./live-candidate.js";
+import { checkModeReviewPolicy } from "./mode-review-policy.js";
+import { checkScopedPolicyBoundary } from "./scoped-policy-boundary.js";
+import { checkSignedPolicyVerifier } from "./signed-policy-verifier.js";
 import { run as checkMnSplit } from "./mn-split";
 import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { checkEnforcementExpectations } from "./enforcement-tests.js";
@@ -19,6 +28,11 @@ import { checkAuthorityArtifacts } from "./authority-artifacts.js";
 import { checkRefusalBindingV2 } from "./refusal-binding-v2.js";
 import { checkLgMapping } from "./lg-mapping.js";
 import { checkLumensVerification } from "./lumens-verification.js";
+import { checkGovernanceManifest, checkGovernedResultManifestBinding } from "./governance-manifest.js";
+import { checkPolicyCodeRegistry } from "./policy-code-registry.js";
+import { checkConstitutionMap } from "./constitution-map.js";
+import { checkTriggerRegistryBindings } from "./trigger-registry-bindings.js";
+import { checkAuthorityLifecycle, checkReplaySemantics } from "./authority-lifecycle.js";
 
 async function runStep(name: string, fn: () => any | Promise<any>) {
   try {
@@ -49,10 +63,26 @@ async function main() {
   await runStep("authority-artifacts", () => checkAuthorityArtifacts());
   await runStep("lumens-verification", () => checkLumensVerification());
   await runStep("refusal-binding-v2", () => checkRefusalBindingV2());
+  await runStep("governance-manifest", () => checkGovernanceManifest());
+  await runStep("governance-manifest-binding", () => checkGovernedResultManifestBinding());
+  await runStep("policy-code-registry", () => checkPolicyCodeRegistry());
+  await runStep("constitution-map", () => checkConstitutionMap());
+  await runStep("trigger-registry-bindings", () => checkTriggerRegistryBindings());
+  await runStep("authority-lifecycle", () => checkAuthorityLifecycle());
+  await runStep("replay-semantics", () => checkReplaySemantics());
 
   await runStep("nomos-order", () => checkNomosOrder());
 
   await runStep("claims-evidence-gate", () => checkClaimsEvidenceGate());
+  await runStep("evaluation-api", () => checkEvaluationApi());
+  await runStep("http-evaluation", () => checkHttpEvaluation());
+  await runStep("bedrock-client-offline", () => checkBedrockClient());
+  await runStep("model-integration-offline", () => checkModelIntegration());
+  await runStep("answer-candidate-contract", () => checkAnswerCandidate());
+  await runStep("live-candidate-adapter-offline", () => checkLiveCandidateAdapter());
+  await runStep("mode-review-policy-simulation", () => checkModeReviewPolicy());
+  await runStep("scoped-policy-boundary", () => checkScopedPolicyBoundary());
+  await runStep("signed-policy-verifier", () => checkSignedPolicyVerifier());
 
   console.log("DIAG: PASS");
 }

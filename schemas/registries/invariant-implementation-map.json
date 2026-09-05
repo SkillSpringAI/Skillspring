@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "status": "canonical",
+  "mappings": [
+    { "invariant_id": "INV-001", "enforcement": "current", "implementation": ["runtime/lumens.ts", "runtime/outputGate.ts"], "diagnostics": ["diagnostics/lumens-verification.ts", "diagnostics/refusal-binding-v2.ts"] },
+    { "invariant_id": "INV-002", "enforcement": "current", "implementation": ["runtime/lg.ts", "runtime/outputGate.ts"], "diagnostics": ["diagnostics/lg-mapping.ts", "diagnostics/failure-code-registry-tests.ts"] },
+    { "invariant_id": "INV-010", "enforcement": "current", "implementation": ["runtime/lg.ts"], "diagnostics": ["diagnostics/lg-mapping.ts"] },
+    { "invariant_id": "INV-020", "enforcement": "current", "implementation": ["runtime/authority/artifacts.ts", "runtime/pipeline.ts"], "diagnostics": ["diagnostics/authority-artifacts.ts"] },
+    { "invariant_id": "INV-030", "enforcement": "current", "implementation": ["runtime/outputGate.ts", "schemas/output.schema.json"], "diagnostics": ["diagnostics/output-invariants.ts"] },
+    { "invariant_id": "INV-031", "enforcement": "current", "implementation": ["runtime/outputGate.ts"], "diagnostics": ["diagnostics/capability-guard-tests.ts"] },
+    { "invariant_id": "INV-032", "enforcement": "current", "implementation": ["runtime/outputGate.ts"], "diagnostics": ["diagnostics/refusal-binding-v2.ts"] }
+  ]
+}

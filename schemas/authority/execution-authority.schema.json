@@ -1,0 +1,27 @@
+{
+  "$id": "skillspring.authority.execution.v1",
+  "type": "object",
+  "required": ["authority_id", "trace_id", "bound_dla_id", "capability", "scope", "purpose", "issued_at", "expires_at", "one_use", "policy_snapshot_id"],
+  "properties": {
+    "authority_id": { "type": "string", "minLength": 8 },
+    "trace_id": { "type": "string", "minLength": 8 },
+    "bound_dla_id": { "type": "string", "minLength": 8 },
+    "capability": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "required": ["resource", "operation"],
+      "properties": {
+        "resource": { "type": "string", "minLength": 1 },
+        "operation": { "type": "string", "minLength": 1 },
+        "constraints": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "purpose": { "type": "string", "minLength": 1 },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "one_use": { "type": "boolean" },
+    "policy_snapshot_id": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

@@ -4,6 +4,7 @@ import schema from "../schemas/output.schema.json";
 import type { PipelineOutput, Mode, ModeReasonCode, PolicyBlock, PolicyEvidenceStatus } from "./types.js";
 import { loadRegistries } from "./registries/registryIndex.js";
 import { decideFromFailureCode } from "./lg.js";
+import { datasetVersions, governanceManifest } from "./governance.js";
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -57,7 +58,7 @@ function ensureDatasetNote(message: string, out: any): string {
 
   // Fallback: enforce presence of dataset note for diagnostics.
   // Values may be UNKNOWN if the upstream output had no evidence.
-  const dv = parseDatasetVersions(null);
+  const dv = datasetVersions();
   const fallback = `datasets: dual-use=${dv.dual_use} reconstruction=${dv.reconstruction}`;
   return message.includes("datasets:") ? message : `${message} (${fallback})`;
 }
@@ -75,6 +76,7 @@ function makePolicy(out: any, decision: "ALLOW" | "REFUSE", decision_code: strin
   return {
     decision,
     decision_code,
+    governance_manifest_id: governanceManifest.manifest_id,
     mode_reason: safeModeReason(out),
     dataset_versions: { dual_use: dv.dual_use, reconstruction: dv.reconstruction },
     trigger_hits: [],
@@ -295,7 +297,5 @@ export function assertAdmissible(out: PipelineOutput): PipelineOutput {
 
   return normalized;
 }
-
-
 
 

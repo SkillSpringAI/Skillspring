@@ -39,6 +39,7 @@ function assertSuccess(out: PipelineOutput, label: string) {
   must((o as any).policy.decision === "ALLOW", `${label}: ok:true policy.decision must be ALLOW`);
   must((o as any).policy.mode_reason === o.mode_reason, `${label}: ok:true policy.mode_reason must match mode_reason`);
   must(typeof (o as any).policy.decision_code === "string" && (o as any).policy.decision_code.length > 0, `${label}: ok:true missing policy.decision_code`);
+  must(/^sha256:[a-f0-9]{64}$/.test((o as any).policy.governance_manifest_id), `${label}: ok:true missing governance_manifest_id`);
   must(!!(o as any).policy.dataset_versions, `${label}: ok:true missing policy.dataset_versions`);
   must(typeof (o as any).policy.dataset_versions.dual_use === "string", `${label}: ok:true missing dataset_versions.dual_use`);
   must(typeof (o as any).policy.dataset_versions.reconstruction === "string", `${label}: ok:true missing dataset_versions.reconstruction`);
@@ -61,6 +62,7 @@ function assertRefusal(out: PipelineOutput, label: string) {
   must((o as any).policy.decision === "REFUSE", `${label}: ok:false policy.decision must be REFUSE`);
   must((o as any).policy.mode_reason === o.mode_reason, `${label}: ok:false policy.mode_reason must match mode_reason`);
   must(typeof (o as any).policy.decision_code === "string" && (o as any).policy.decision_code.length > 0, `${label}: ok:false missing policy.decision_code`);
+  must(/^sha256:[a-f0-9]{64}$/.test((o as any).policy.governance_manifest_id), `${label}: ok:false missing governance_manifest_id`);
   must(!!(o as any).policy.dataset_versions, `${label}: ok:false missing policy.dataset_versions`);
   must(typeof (o as any).policy.dataset_versions.dual_use === "string", `${label}: ok:false missing dataset_versions.dual_use`);
   must(typeof (o as any).policy.dataset_versions.reconstruction === "string", `${label}: ok:false missing dataset_versions.reconstruction`);

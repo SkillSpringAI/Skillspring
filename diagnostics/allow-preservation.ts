@@ -14,6 +14,7 @@ export async function run() {
     policy: {
       decision: "ALLOW",
       decision_code: "ALLOW_SAFE",
+      governance_manifest_id: "sha256:" + "0".repeat(64),
       mode_reason: "DEFAULT_SAFE",
       dataset_versions: { dual_use: "v-test", reconstruction: "v-test" },
       trigger_hits: [],

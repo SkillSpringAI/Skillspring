@@ -32,6 +32,7 @@ export type TriggerHit = {
 export type PolicyBlock = {
   decision: PolicyDecision;
   decision_code: string;
+  governance_manifest_id: string;
   mode_reason: ModeReasonCode;
   dataset_versions: {
     dual_use: string;

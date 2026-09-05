@@ -40,6 +40,7 @@ export function createGeneratedRegistrySources(repoRoot: string): GeneratedFile[
 
   const invariants = readJson<unknown>(invariantsJsonPath);
   const failureCodes = readJson<unknown>(failureCodesJsonPath);
+  const decisionCodes = readJson<unknown>(path.resolve(repoRoot, "schemas/registries/decision-codes.v1.json"));
 
   const invariantsTs = renderGeneratedModule({
     importType: "InvariantRegistryV1",
@@ -58,6 +59,14 @@ export function createGeneratedRegistrySources(repoRoot: string): GeneratedFile[
   });
 
   return [
+    {
+      outputPath: path.resolve(repoRoot, "runtime/registries/generated/decisionCodes.v1.ts"),
+      content: [
+        "/** GENERATED. Source: schemas/registries/decision-codes.v1.json. */",
+        `export const DECISION_CODES_V1 = ${stableJson(decisionCodes)} as const;`,
+        ""
+      ].join("\n")
+    },
     {
       outputPath: path.resolve(repoRoot, "runtime/registries/generated/invariants.v2.ts"),
       content: invariantsTs

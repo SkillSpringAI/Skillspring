@@ -1,0 +1,78 @@
+{
+  "schema_version": "skillspring.governance-manifest.v1",
+  "constitution": {
+    "version": "1.0",
+    "hash": "sha256:2406f344592d2c3c4b5d98d8d3713a6bc1b117469c4913af3424b2f0ca0d94f1"
+  },
+  "registries": {
+    "triggers": {
+      "version": "1.0.0",
+      "hash": "sha256:938426b47097af6e6693cac41c03fcdb9df48d66e08a062875b4be8a47a3b814"
+    },
+    "modes": {
+      "version": "1.0.0",
+      "hash": "sha256:b86e4ef6255391c929e89de815346f6434187c4181ce8f403813eb85c3e8c69e"
+    },
+    "cycles": {
+      "version": "1.0.0",
+      "hash": "sha256:3757135461927abc8ac5d997134ac9a38760e23bc92a34c82c760e8fdfcecf67"
+    },
+    "invariants": {
+      "version": "v2",
+      "hash": "sha256:452ba3aea3ef8dde9d050013ace6e412ca64b0bf6c1b81dbc6d066c4a3498400"
+    },
+    "failure_codes": {
+      "version": "v2",
+      "hash": "sha256:2ba0a74c9659489763017cc1e3ff40b208b98de0da1afc23a59bcb8da74b1075"
+    },
+    "decision_codes": {
+      "version": "v1",
+      "hash": "sha256:c13399ca33bc3f54f0ec9b052b66d236e78232ed687454d89236aaca23d73d5e"
+    }
+  },
+  "schemas": {
+    "generated_answer_candidate": {
+      "version": "v1",
+      "hash": "sha256:daca06a916d1e08b0885189fa9002a7c5331101478f20f9d93b0649b8855eb00"
+    },
+    "evaluate_request": {
+      "version": "v1",
+      "hash": "sha256:85960ee9e778c3550abc61f8665c3d3507eb210385e1b91cba77f8f85d95f7b7"
+    },
+    "evaluate_response": {
+      "version": "v1",
+      "hash": "sha256:815135164e4db97e003359d2b61cee294e627a35aecf7df2ef03569b4739b238"
+    },
+    "output": {
+      "version": "1.0.0",
+      "hash": "sha256:a2e85006f7959be1a9750e28655206161e4b13d53a483c8d8777c171e0f3b816"
+    },
+    "output_admissibility": {
+      "version": "1.0.0",
+      "hash": "sha256:a8f90d9ac5dbdd1ac7141d3db89af93fa502ec1e1a98e1c025e194ce32d2564c"
+    },
+    "dla": {
+      "version": "1.0.0",
+      "hash": "sha256:90231360e263b41d7ed423610b7db5369fff41784dc0642565e85d0015b53b8d"
+    },
+    "permission_token": {
+      "version": "1.0.0",
+      "hash": "sha256:c85e02dc07126b005dfbcd93a444339a86d5ae5d9055bfb987b5bd53a25caee6"
+    },
+    "execution_authority": {
+      "version": "1.0.0",
+      "hash": "sha256:bc0dbe207a336f90e2e25cc228e0e956bea34644e517040808d69540adccb87d"
+    }
+  },
+  "datasets": {
+    "dual_use": {
+      "version": "v1",
+      "hash": "sha256:3ae89d96482423577e8173a649a1fb32e10093e3527a16f4b05c1da1131fdefa"
+    },
+    "reconstruction": {
+      "version": "v1",
+      "hash": "sha256:adbb9a3ee63c429bed7a5be35d3d8965db1b98f4ca99cd540b2c98f1052c654d"
+    }
+  },
+  "manifest_id": "sha256:3cd5a148847c9d0859e03cdc2fd1d3cfedc4bc5f87c92236b675e17df99df0f1"
+}
