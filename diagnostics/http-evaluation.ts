@@ -89,7 +89,14 @@ export async function checkHttpEvaluation(): Promise<void> {
       socket.on("error", reject);
       socket.on("close", () => {
         clearTimeout(watchdog);
-        try { assert.match(response, /408/); assert.match(response, /REQUEST_TIMEOUT/); resolve(); }
+        try {
+          assert.match(response, /^HTTP\/1\.1 408 Request Timeout\r\n/);
+          // Node's transport deadline may win the race with the JSON deadline.
+          const body = response.split("\r\n\r\n").slice(1).join("\r\n\r\n");
+          if (body.length) assert.match(body, /"code":"REQUEST_TIMEOUT"/);
+          assert.equal(response.includes('"result"'), false);
+          resolve();
+        }
         catch (error) { reject(error); }
       });
     });

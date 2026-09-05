@@ -97,3 +97,9 @@ The test-only client is documented in `docs/BEDROCK_TESTING.md`, including the
 user-reported successful live smoke test. The HTTP endpoint remains independent of Bedrock.
 Model output is untrusted test data and must not choose authority or replace
 deterministic policy gates.
+
+## Transport timeout responses
+
+An incomplete upload may receive a bare HTTP 408 Request Timeout from Node or
+the application's JSON REQUEST_TIMEOUT error, depending on which deadline fires
+first. Clients must handle both. Neither response contains an evaluation result.
