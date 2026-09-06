@@ -25,6 +25,7 @@ See [repository conventions](docs/REPOSITORY_STATE.md) and the
 | Local API | Strict versioned evaluateV1 contract and loopback-only POST /v1/evaluate |
 | Bedrock tests | Explicit live commands using Sydney and au.anthropic.claude-opus-4-6-v1; fixed synthetic prompts |
 | Answer candidates | Request IDs, prompt/answer hashes, evidence references, and pending-review contract; release remains false |
+| Candidate evidence review | Exact source/claim bindings and signed reviewer assessments, checked against durable history and current scope |
 | Access/review simulation | Draft role/domain/mode scopes, purpose/environment constraints, denial precedence, and recipient-access checks |
 | Signed policy inputs | Ed25519 verification, signer binding, rotation/revocation, and in-memory revision checks |
 | Durable policy simulation | SQLite accepted-event history, restart-safe observations, stable review IDs, and stored rejection checks |
@@ -47,7 +48,7 @@ npm run preflight
 npm run dev -- "Explain governance."
 ```
 
-Preflight compiles TypeScript and runs **37 diagnostic steps** without AWS calls.
+Preflight compiles TypeScript and runs **38 diagnostic steps** without AWS calls.
 CI validates committed registry changes using explicit event comparison revisions;
 see [registry change validation](docs/REGISTRY_CHANGE_VALIDATION.md).
 Supported launch commands use tsx. The build is not a packaged distribution;
@@ -124,6 +125,11 @@ Start with [current state](docs/CURRENT_STATE.md) and the
 
 The [durable history slice](docs/DURABLE_POLICY_HISTORY.md) adds transactional
 simulation storage without activating access or answer release.
+
+The [candidate evidence review slice](docs/CANDIDATE_EVIDENCE_REVIEW.md) connects
+that history to sourced drafts and reviewer attestations. Run
+`npm run demo:candidate-review` for a synthetic three-mode walkthrough; it makes
+no provider calls and performs no real human review.
 
 Read [contributing](CONTRIBUTING.md), [governance](GOVERNANCE.md),
 [security](SECURITY.md), and [engineer guidance](docs/INTERNAL_ENGINEER_HANDOFF.md)

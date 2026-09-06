@@ -98,6 +98,10 @@ A draft mode/role/domain-scoped review process and non-operative simulation
 are now in `docs/MODE_ACCESS_AND_RELEASE_REVIEW.md`. Review completeness never
 changes this candidate contract's release_authorized=false invariant.
 
+The [candidate evidence review slice](CANDIDATE_EVIDENCE_REVIEW.md) now binds
+sourced candidates to durable signed claim assessments. It leaves this contract's
+UNVERIFIED/PENDING fields and release_authorized=false invariant unchanged.
+
 ## User-reported live candidate evidence
 
 Report: `skillspring.candidate-test-report.v1`, `passed: true`.

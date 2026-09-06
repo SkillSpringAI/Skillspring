@@ -22,7 +22,7 @@ type AccessRequest = { actor: string; mode: AccessMode; domain: string; resource
 function includes(values: readonly string[], value: string) { return values.includes(value); }
 function uniqueIds(items: { id: string }[]) { return new Set(items.map(item => item.id)).size === items.length; }
 
-function hasClearance(request: AccessRequest, role: Role, context: PolicyContext): boolean {
+export function hasClearance(request: AccessRequest, role: Role, context: PolicyContext): boolean {
   return context.clearances.some(clearance => {
     const issuer = context.principals.find(p => p.id === clearance.issuer);
     return clearance.subject === request.actor && clearance.role === role && clearance.domain === request.domain &&
@@ -66,6 +66,14 @@ export type ReviewRecord = {
   id: string; reviewer: string; role: Role; subjectHash: string; decision: "APPROVE" | "REJECT";
   evidence: "VERIFIED" | "UNVERIFIED"; authorityClaims: "CLEARED" | "PENDING";
   outputChecks: "PASS" | "FAIL"; reviewedAt: number; expiresAt: number; revoked: boolean;
+  candidateAssessment?: CandidateAssessment;
+};
+export type CandidateAssessment = {
+  schema_version: "skillspring.candidate-assessment.draft.v1";
+  package_sha256: string; answer_sha256: string; coverage: "COMPLETE" | "INCOMPLETE";
+  claim_checks: { claim_id: string; finding: "SUPPORTED" | "UNSUPPORTED" | "UNCERTAIN" }[];
+  authority_claims: "CLEARED" | "REJECTED" | "UNCERTAIN";
+  output_admissibility: "PASS" | "FAIL" | "UNCERTAIN";
 };
 function canonical(value: unknown): string {
   if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);

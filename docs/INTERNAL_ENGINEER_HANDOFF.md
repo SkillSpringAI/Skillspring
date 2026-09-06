@@ -39,6 +39,11 @@ store is absent in the in-memory adapter. The optional durable simulation stores
 accepted history in SQLite; see [its trust limits](DURABLE_POLICY_HISTORY.md).
 Hypothetical success must retain false actual-authority flags.
 
+The [candidate evidence review](CANDIDATE_EVIDENCE_REVIEW.md) wrapper requires
+validated packages and bound signed assessments. It also checks current evidence
+and answer read clearance. Reviewer declarations remain external attestations;
+they do not mutate the draft's pending fields or authorize public output.
+
 Datasets inform decisions but do not grant permission or override the constitution.
 Likewise, a signature authenticates a statement against configured trust; it does
 not prove that statement true or authorize a resource operation.
@@ -52,7 +57,7 @@ diagnostics, and review contract, registry, and provenance impact. Experimental
 schemas do not become operative authority simply by being added to the repository.
 
 Follow [contributing](../CONTRIBUTING.md) for regeneration and review steps.
-Run `npm run preflight`: TypeScript compilation and 37 offline diagnostic steps.
+Run `npm run preflight`: TypeScript compilation and 38 offline diagnostic steps.
 Fix failures at their source rather than weakening checks. Preserve historical
 live reports under their original manifest IDs and never commit credentials.
 

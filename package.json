@@ -10,6 +10,7 @@
         "bedrock:smoke": "tsx scripts/bedrock/smoke.ts",
         "bedrock:evaluate": "tsx scripts/bedrock/evaluate.ts",
         "bedrock:candidates": "tsx scripts/bedrock/candidates.ts",
+        "demo:candidate-review": "tsx diagnostics/candidate-review-demo.ts",
         "diag": "tsx diagnostics/run.ts",
         "build": "tsc -p tsconfig.json",
         "run": "node --enable-source-maps dist/cli.js",

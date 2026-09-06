@@ -2,7 +2,9 @@ import Ajv from "ajv";
 import subjectSchema from "../../schemas/review-policy/subject.draft.v1.schema.json";
 import { InMemoryPolicyVerifier, type SignedArtifact, type TrustedKey } from "./verifier.js";
 import { hashPolicyJson, reviewSubjectHash, type ReviewRecord } from "./simulate.js";
-import { checkScopedAccess, checkScopedReview, type ScopedSubject } from "./boundary.js";
+import { checkScopedAccess, checkScopedReview, reviewerCanReadSources, type ScopedSubject } from "./boundary.js";
+import { validateCandidateReviewSubject, assessmentBindingReason, assessmentComplete,
+  type CandidateReviewContext, type CandidateReviewPackage } from "./candidate-review.js";
 import type { HistoryEvent, PolicyHistoryStore } from "./history-store.js";
 
 const validSubject = new Ajv({ strict: true, ownProperties: true }).compile<ScopedSubject>(subjectSchema);
@@ -98,6 +100,21 @@ export class DurablePolicySimulation {
   acceptReview(artifact: SignedArtifact, subjectHash: string, now: number) {
     return this.#accept({ type: "artifact", artifact, now, subjectHash });
   }
+  acceptCandidateReview(subject: unknown, context: CandidateReviewContext, artifact: SignedArtifact, now: number) {
+    const fail = (reason: string) => ({ status: "SIMULATION_ONLY" as const, accepted: false, reason,
+      access_authorized: false as const, release_authorized: false as const });
+    try {
+      const checked = validateCandidateReviewSubject(subject, context, now);
+      if (!checked.ok) return fail(checked.reason);
+      const record = artifact.payload as ReviewRecord;
+      // Explicit rejections remain blockers even without a positive evidence assessment.
+      if (record.decision !== "REJECT") {
+        const reason = assessmentBindingReason(checked.package, record);
+        if (reason) return fail(reason);
+      }
+      return this.acceptReview(artifact, reviewSubjectHash(subject as ScopedSubject), now);
+    } catch { return fail("INVALID_CANDIDATE_REVIEW"); }
+  }
   // Trusted management inputs, not public API operations. There is no un-revoke or rejection-clear operation.
   revokeKey(keyId: string, now: number) { return this.#accept({ type: "revoke-key", keyId, now }); }
   revokeArtifact(kind: "snapshot" | "review", artifactId: string, now: number) {
@@ -117,8 +134,19 @@ export class DurablePolicySimulation {
   }
   /** No records argument: every accepted record for this subject is read under the same lock. */
   checkReview(subject: unknown, snapshot: SignedArtifact, now: number) {
+    return this.#checkReview(subject, snapshot, now);
+  }
+  checkCandidateReview(subject: unknown, context: CandidateReviewContext, snapshot: SignedArtifact, now: number) {
+    const checked = validateCandidateReviewSubject(subject, context, now);
+    if (!checked.ok) return { status: "SIMULATION_ONLY" as const, review_complete: false, reason: checked.reason, release_authorized: false as const };
+    return this.#checkReview(subject, snapshot, now, checked.package);
+  }
+  #checkReview(subject: unknown, snapshot: SignedArtifact, now: number, pkg?: CandidateReviewPackage) {
     try {
       requireCondition(validSubject(subject), "INVALID_REVIEW_CONTRACT");
+      if (!pkg && (subject.candidate as CandidateReviewPackage).schema_version === "skillspring.candidate-review-package.draft.v1") {
+        throw new Denied("USE_CANDIDATE_REVIEW_BOUNDARY");
+      }
       const binding = reviewSubjectHash(subject);
       return this.#transaction((projection, accept) => {
         accept({ type: "artifact", artifact: snapshot, now, subjectHash: null });
@@ -134,6 +162,19 @@ export class DurablePolicySimulation {
         }
         const verified = projection.verifier.verifySnapshot(snapshot, now);
         if (!verified.ok) throw new Denied(verified.code);
+        if (pkg) {
+          const resources = [...new Set(pkg.sources.map(source => source.resource))];
+          for (const actor of subject.audience) for (const resource of resources) {
+            const access = checkScopedAccess({ actor, resource, mode: subject.accessMode, domain: subject.domain, operation: "read",
+              purpose: subject.purpose, environment: subject.environment, organization: subject.organization, policy_digest: subject.policy_digest
+            }, verified.snapshot, verified.receipt);
+            if (!access.would_permit) throw new Denied("AUDIENCE_EVIDENCE_ACCESS_DENIED");
+          }
+          const eligible = records.filter(record => assessmentComplete(pkg, record) &&
+            reviewerCanReadSources(subject, record, [subject.resource, ...resources], verified.snapshot, verified.receipt));
+          const reviewed = checkScopedReview(subject, eligible, verified.snapshot, verified.receipt);
+          return { ...reviewed, reason: reviewed.review_complete ? "CANDIDATE_REVIEW_COMPLETE_NOT_RELEASE_AUTHORITY" : reviewed.reason };
+        }
         return checkScopedReview(subject, records, verified.snapshot, verified.receipt);
       });
     } catch (error) {
