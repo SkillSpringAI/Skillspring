@@ -47,6 +47,11 @@ to review. It needs no AWS access or role/catalog decision.
 
 ### 2. Add durable trust and complete review history in simulation
 
+Implemented as a bounded local event-store simulation; see
+[durable policy history](DURABLE_POLICY_HISTORY.md). The following scope remains
+the design record. External completeness and full-database rollback protection
+are explicitly outside the local adapter's guarantees.
+
 Define a storage contract before choosing a production service. An initial local
 transactional adapter should persist accepted revision/digest observations,
 revocations, stable review identities, and append-only review events per

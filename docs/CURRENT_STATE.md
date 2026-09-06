@@ -39,15 +39,20 @@ not establish an authenticated access workspace or grant privileges.
 - Ed25519 snapshot/review verification binds signers, organization, revisions,
   validity, and payloads. Revocation, replacement keys, and rollback/conflict
   checks operate within one in-memory verifier instance.
+- Optional SQLite simulation history persists signed observations, revocations,
+  stable review identities, and blocking rejections. Transactions serialize
+  checks across processes; failed writes and pre-commit crashes roll back.
+  See `docs/DURABLE_POLICY_HISTORY.md` for the fixed trust configuration and limits.
 
 All policy simulations retain false actual-authority flags. Draft review-policy
 schemas are not active authority and are outside the runtime governance manifest.
 
 ## Verification and live evidence
 
-`npm run preflight` includes compilation and **36 diagnostic steps**. The added
-Git fixtures exercise CI comparison selection and registry change rules; see
-`docs/REGISTRY_CHANGE_VALIDATION.md`. The original checkpoint had 35 steps.
+`npm run preflight` includes compilation and **37 diagnostic steps**. Added
+fixtures exercise CI registry comparisons and durable-history failure cases;
+see `docs/REGISTRY_CHANGE_VALIDATION.md` and `docs/DURABLE_POLICY_HISTORY.md`.
+The original checkpoint had 35 steps.
 `git diff --check` passes. The local workflow was exercised on Windows. Existing
 GitHub workflows install dependencies and run preflight with Node.js 24 on Ubuntu;
 both GitHub workflows were also observed passing for checkpoint commit `ddcdb70`.
@@ -73,10 +78,10 @@ for independent hash recomputation.
 - No final answer-release controller, real resource enforcement, tool executor,
   or autonomous agent behavior.
 - No production identity integration, remotely authenticated API, operational
-  grant issuance, key-management service, or authenticated review-history store.
-- Verifier state resets on restart. Durable rollback prevention, multi-process
-  coordination, revocation-at-use, and complete review history remain unsolved.
-  A signature alone cannot establish that no rejection was omitted.
+  grant issuance, key-management service, or production review-history service.
+- The in-memory verifier resets on restart. The local durable adapter preserves
+  accepted history but cannot prove external completeness or detect restoration
+  of a consistent older database. Revalidation at a real resource remains absent.
 - Evidence hashes do not prove factual support. Semantic authority-claim review
   and final answer admissibility remain pending.
 - Dataset/keyword/import checks are regression evidence, not a complete security
@@ -91,7 +96,7 @@ Code review does not grant operational access or answer-release permission.
 See `docs/REVIEW_HANDOFF.md` for the checkpoint scope and review map.
 
 Before operational integration, select a trusted external identity/key source,
-design durable snapshot/revocation and complete review history, settle the actual
+design operational trust migration and external history guarantees, settle the actual
 role/domain/resource catalog, and define evidence/authority-claim requirements
 for answer release. Expansion beyond constitutional authority requires the
 formal amendment process. Those next design tasks are not implemented.

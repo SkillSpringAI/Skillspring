@@ -61,6 +61,10 @@ not be accepted from untrusted callers or cached for operational use.
 
 ## Material limitations for review
 
+These limitations describe the original in-memory adapter. The subsequent
+[durable history slice](DURABLE_POLICY_HISTORY.md) adds transactionally persisted
+accepted observations and store-sourced review checks. Both remain simulations.
+
 - Revision history, revocations, and observed time are memory-only. Restarting
   or constructing a new verifier resets them. This is not durable anti-rollback.
 - Key enrollment/rotation is supplied as trusted configuration; there is no

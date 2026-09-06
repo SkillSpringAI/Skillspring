@@ -89,3 +89,7 @@ The signed snapshot/review-record verifier and local rotation, revocation,
 and in-memory rollback tests are implemented. User review is complete;
 see `docs/REVIEW_HANDOFF.md`. Operational activation still requires durable
 trust state and review against constitutional authority boundaries.
+
+The subsequent [durable history slice](DURABLE_POLICY_HISTORY.md) supplies a
+local transactional simulation wrapper. Operational trust and resource enforcement
+remain separate unresolved boundaries.

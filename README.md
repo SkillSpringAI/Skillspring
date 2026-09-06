@@ -27,6 +27,7 @@ See [repository conventions](docs/REPOSITORY_STATE.md) and the
 | Answer candidates | Request IDs, prompt/answer hashes, evidence references, and pending-review contract; release remains false |
 | Access/review simulation | Draft role/domain/mode scopes, purpose/environment constraints, denial precedence, and recipient-access checks |
 | Signed policy inputs | Ed25519 verification, signer binding, rotation/revocation, and in-memory revision checks |
+| Durable policy simulation | SQLite accepted-event history, restart-safe observations, stable review IDs, and stored rejection checks |
 | Execution lifecycle | Authority, lifecycle, journal, and replay contracts/diagnostics; no real executor or durable store |
 
 The model test harness is separate from the public evaluation API. Policy
@@ -46,7 +47,7 @@ npm run preflight
 npm run dev -- "Explain governance."
 ```
 
-Preflight compiles TypeScript and runs **36 diagnostic steps** without AWS calls.
+Preflight compiles TypeScript and runs **37 diagnostic steps** without AWS calls.
 CI validates committed registry changes using explicit event comparison revisions;
 see [registry change validation](docs/REGISTRY_CHANGE_VALIDATION.md).
 Supported launch commands use tsx. The build is not a packaged distribution;
@@ -92,8 +93,9 @@ generated-answer release authority or factual accuracy.
 
 - No operational identity provider, grants, real resource enforcement, autonomous
   execution, or generated-answer release transition.
-- Verifier history and revocation state reset on restart. Complete authenticated
-  review history and durable rollback protection are absent.
+- The in-memory verifier resets on restart. The optional durable simulation
+  preserves accepted history locally; it cannot detect whole-database rollback
+  or reviews never submitted to its store.
 - The local server assumes trusted local clients; it is not remotely authenticated
   or ready for public deployment.
 - Hashes bind data but do not prove evidence truth. Candidate reviews remain pending.
@@ -119,6 +121,9 @@ Start with [current state](docs/CURRENT_STATE.md) and the
 [mode/access review](docs/MODE_ACCESS_AND_RELEASE_REVIEW.md),
 [scoped policy checks](docs/SCOPED_POLICY_BOUNDARY.md), and
 [signed policy verification](docs/SIGNED_POLICY_VERIFIER.md).
+
+The [durable history slice](docs/DURABLE_POLICY_HISTORY.md) adds transactional
+simulation storage without activating access or answer release.
 
 Read [contributing](CONTRIBUTING.md), [governance](GOVERNANCE.md),
 [security](SECURITY.md), and [engineer guidance](docs/INTERNAL_ENGINEER_HANDOFF.md)

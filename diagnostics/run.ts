@@ -9,6 +9,7 @@ import { checkLiveCandidateAdapter } from "./live-candidate.js";
 import { checkModeReviewPolicy } from "./mode-review-policy.js";
 import { checkScopedPolicyBoundary } from "./scoped-policy-boundary.js";
 import { checkSignedPolicyVerifier } from "./signed-policy-verifier.js";
+import { checkDurablePolicyHistory } from "./durable-policy-history.js";
 import { run as checkMnSplit } from "./mn-split";
 import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { checkEnforcementExpectations } from "./enforcement-tests.js";
@@ -85,6 +86,7 @@ async function main() {
   await runStep("mode-review-policy-simulation", () => checkModeReviewPolicy());
   await runStep("scoped-policy-boundary", () => checkScopedPolicyBoundary());
   await runStep("signed-policy-verifier", () => checkSignedPolicyVerifier());
+  await runStep("durable-policy-history", () => checkDurablePolicyHistory());
 
   console.log("DIAG: PASS");
 }
