@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillspring.dev/schemas/candidate-assessment.draft.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "package_sha256", "answer_sha256", "coverage", "claim_checks", "authority_claims", "output_admissibility"],
+  "properties": {
+    "schema_version": { "const": "skillspring.candidate-assessment.draft.v1" },
+    "package_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "answer_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "coverage": { "enum": ["COMPLETE", "INCOMPLETE"] },
+    "claim_checks": {
+      "type": "array", "maxItems": 64,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["claim_id", "finding"],
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "finding": { "enum": ["SUPPORTED", "UNSUPPORTED", "UNCERTAIN"] }
+        }
+      }
+    },
+    "authority_claims": { "enum": ["CLEARED", "REJECTED", "UNCERTAIN"] },
+    "output_admissibility": { "enum": ["PASS", "FAIL", "UNCERTAIN"] }
+  }
+}

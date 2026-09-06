@@ -3,8 +3,9 @@ import snapshotSchema from "../../schemas/review-policy/snapshot.draft.v1.schema
 import requestSchema from "../../schemas/review-policy/request.draft.v1.schema.json";
 import subjectSchema from "../../schemas/review-policy/subject.draft.v1.schema.json";
 import recordsSchema from "../../schemas/review-policy/records.draft.v1.schema.json";
+import assessmentSchema from "../../schemas/review-policy/candidate-assessment.draft.v1.schema.json";
 import { draftPolicy } from "./policy.js";
-import { hashPolicyJson, simulateAccess, simulateReleaseReview, type PolicyContext, type Resource, type Clearance, type AccessMode, type Operation, type ReviewSubject, type ReviewRecord } from "./simulate.js";
+import { hasClearance, hashPolicyJson, simulateAccess, simulateReleaseReview, type PolicyContext, type Resource, type Clearance, type AccessMode, type Operation, type ReviewSubject, type ReviewRecord } from "./simulate.js";
 
 export const policyDigest = hashPolicyJson(draftPolicy);
 export type ScopedRequest = {
@@ -29,6 +30,7 @@ export type VerifiedSnapshotReceipt = {
   snapshot_id: string; snapshot_digest: string; organization: string; now: number;
 };
 const ajv = new Ajv({ strict: true, ownProperties: true });
+ajv.addSchema(assessmentSchema);
 const validateSnapshot = ajv.compile<PolicySnapshot>(snapshotSchema);
 const validateRequest = ajv.compile<ScopedRequest>(requestSchema);
 const validateSubject = ajv.compile<ScopedSubject>(subjectSchema);
@@ -90,4 +92,22 @@ export function checkScopedReview(subject: unknown, records: unknown, snapshot: 
     context.clearances = context.clearances.filter(grant => !denied({ ...request, actor: grant.subject }, snapshot));
     return simulateReleaseReview(subject, records, context);
   } catch { return reject("INVALID_CONTEXT"); }
+}
+
+/** Review-role evidence clearance, not a workspace grant. Supports an independent Architect governance reviewer. */
+export function reviewerCanReadSources(subject: ScopedSubject, record: ReviewRecord, resources: string[],
+  snapshot: PolicySnapshot, receipt: VerifiedSnapshotReceipt): boolean {
+  if (!checkSnapshot(snapshot, receipt)) return false;
+  const principal = snapshot.principals.find(item => item.id === record.reviewer);
+  if (!principal?.roles.includes(record.role) || !principal.domains.includes(subject.domain) ||
+    !(draftPolicy.reviewerRoles[subject.accessMode] as readonly string[]).includes(record.role)) return false;
+  return resources.every(resource => {
+    const request: ScopedRequest = { actor: record.reviewer, mode: subject.accessMode, domain: subject.domain, resource,
+      operation: "read", purpose: subject.purpose, environment: subject.environment,
+      organization: subject.organization, policy_digest: subject.policy_digest };
+    const target = snapshot.resources.find(item => item.id === resource);
+    return scopeMatches(request, snapshot) && target?.domain === subject.domain && target.classification !== "protected" &&
+      (draftPolicy.modes[subject.accessMode].classes as readonly string[]).includes(target.classification) &&
+      !denied(request, snapshot) && hasClearance(request, record.role, contextFor(request, snapshot, receipt.now));
+  });
 }

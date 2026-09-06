@@ -19,6 +19,7 @@
       "revoked"
     ],
     "properties": {
+      "candidateAssessment": { "$ref": "https://skillspring.dev/schemas/candidate-assessment.draft.v1.json" },
       "id": {
         "type": "string",
         "minLength": 1,

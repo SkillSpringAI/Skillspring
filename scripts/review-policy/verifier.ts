@@ -3,6 +3,7 @@ import Ajv from "ajv";
 import envelopeSchema from "../../schemas/review-policy/signed-artifact.draft.v1.schema.json";
 import snapshotSchema from "../../schemas/review-policy/snapshot.draft.v1.schema.json";
 import recordsSchema from "../../schemas/review-policy/records.draft.v1.schema.json";
+import assessmentSchema from "../../schemas/review-policy/candidate-assessment.draft.v1.schema.json";
 import { hashPolicyJson, type ReviewRecord } from "./simulate.js";
 import { policyDigest, type PolicySnapshot, type VerifiedSnapshotReceipt } from "./boundary.js";
 
@@ -19,6 +20,7 @@ export type TrustedKey = {
 type Failure = { ok: false; code: string };
 type Verified = { ok: true; envelope: SignedArtifact };
 const ajv = new Ajv({ strict: true, ownProperties: true });
+ajv.addSchema(assessmentSchema);
 const validEnvelope = ajv.compile<SignedArtifact>(envelopeSchema);
 const validSnapshot = ajv.compile<PolicySnapshot>(snapshotSchema);
 const validRecord = ajv.compile<ReviewRecord>(recordsSchema.items);

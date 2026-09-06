@@ -34,7 +34,7 @@ CI compares committed base/head revisions; local hooks check staged and unstaged
 changes separately. Stage a registry's changelog, index, and exact generated module
 together. See [comparison selection and limits](docs/REGISTRY_CHANGE_VALIDATION.md).
 
-Preflight compiles TypeScript and runs 37 diagnostic steps, including fake
+Preflight compiles TypeScript and runs 38 diagnostic steps, including fake
 provider responses, local HTTP requests, and ephemeral signing keys. It makes
 temporary SQLite stores and uses child processes to test write races and crash
 recovery. Node 24 currently reports its built-in SQLite API as experimental. It makes
@@ -50,6 +50,11 @@ endings and do not rewrite historical evidence with a newer manifest ID.
 Draft schemas under `schemas/review-policy/` and scripts under
 `scripts/review-policy/` remain outside runtime authority and the active manifest.
 Do not turn hypothetical success into actual access or answer release.
+
+Candidate review requirements are versioned separately from the canonical draft
+answer contract. Signed attestations must bind the exact candidate/evidence
+package and scope. Do not treat matched hashes or synthetic reviewer fixtures
+as verified factual support. See [candidate evidence review](docs/CANDIDATE_EVIDENCE_REVIEW.md).
 
 Review untracked files as well as tracked changes before staging. Check the
 staged diff for unintended artifacts and credentials, and run

@@ -95,4 +95,9 @@ Failure tests inject an SQL failure after event insertion but before metadata
 update, terminate a child process before commit, corrupt/truncate stored events,
 and hold a competing write lock. Two independent processes race with conflicting
 signed revisions; only one is accepted, and the stored winner remains authoritative
-after reopening. Preflight now has 37 diagnostic steps. No AWS calls are needed.
+after reopening. This slice brought preflight to 37 diagnostic steps; the README
+records the current count. No AWS calls are needed.
+
+The subsequent [candidate evidence review slice](CANDIDATE_EVIDENCE_REVIEW.md)
+adds a stronger package-specific gate and optional signed assessment fields.
+Historical generic records continue to replay, but cannot satisfy that gate alone.

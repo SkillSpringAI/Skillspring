@@ -72,6 +72,11 @@ this production anti-rollback or identity authentication.
 
 ### 3. Connect candidate evidence and review contracts
 
+Implemented as the [candidate evidence review slice](CANDIDATE_EVIDENCE_REVIEW.md),
+with a sourced informational scope, signed reviewer attestations, and synthetic
+end-to-end diagnostics. Factual truth, external reviewer identity, and actual
+release authority remain separate unresolved responsibilities.
+
 Bind stored reviews to a validated candidate, evidence receipts, policy version,
 mode/domain, and intended audience. Define the supported claim/evidence checks
 and human responsibilities before creating a release transition. Use synthetic

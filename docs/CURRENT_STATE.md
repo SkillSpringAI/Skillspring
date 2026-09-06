@@ -43,14 +43,19 @@ not establish an authenticated access workspace or grant privileges.
   stable review identities, and blocking rejections. Transactions serialize
   checks across processes; failed writes and pre-commit crashes roll back.
   See `docs/DURABLE_POLICY_HISTORY.md` for the fixed trust configuration and limits.
+- Candidate review packages bind a validated draft and trusted context to source
+  artifacts, complete answer spans, evidence excerpts, and the intended scope.
+  Stored signed assessments must cover each claim and satisfy current reviewer
+  and recipient clearances. See `docs/CANDIDATE_EVIDENCE_REVIEW.md`.
 
 All policy simulations retain false actual-authority flags. Draft review-policy
 schemas are not active authority and are outside the runtime governance manifest.
 
 ## Verification and live evidence
 
-`npm run preflight` includes compilation and **37 diagnostic steps**. Added
-fixtures exercise CI registry comparisons and durable-history failure cases;
+`npm run preflight` includes compilation and **38 diagnostic steps**. Added
+fixtures exercise CI registry comparisons, durable-history failure cases, and
+candidate evidence/assessment checks in all three modes;
 see `docs/REGISTRY_CHANGE_VALIDATION.md` and `docs/DURABLE_POLICY_HISTORY.md`.
 The original checkpoint had 35 steps.
 `git diff --check` passes. The local workflow was exercised on Windows. Existing
@@ -82,8 +87,9 @@ for independent hash recomputation.
 - The in-memory verifier resets on restart. The local durable adapter preserves
   accepted history but cannot prove external completeness or detect restoration
   of a consistent older database. Revalidation at a real resource remains absent.
-- Evidence hashes do not prove factual support. Semantic authority-claim review
-  and final answer admissibility remain pending.
+- Evidence hashes do not prove factual support. Candidate review checks signed
+  declarations of support and authority/output inspection; it cannot prove the
+  declarations true or that a human performed them. Final answer release remains absent.
 - Dataset/keyword/import checks are regression evidence, not a complete security
   boundary or proof of constitutional coverage.
 - Build compiles source for checking; supported launch commands use tsx. The
