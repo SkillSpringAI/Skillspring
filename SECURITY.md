@@ -50,7 +50,12 @@ Bedrock commands are opt-in tests using fixed prompts. Keep bearer tokens in
 the local environment; never commit credentials or include them in reports.
 Offline diagnostics use fake provider responses and ephemeral signing keys.
 
-Signed-policy verification remains a simulation. Pinned test trust, revocation,
-and revision observations are process-local; restart loses history. Signatures
-do not establish evidence truth, complete review history, or resource access.
-Actual access and answer-release flags remain false.
+Signed-policy verification remains a simulation. The original in-memory adapter
+loses history at restart. The optional SQLite adapter preserves accepted signed
+events, revocations, and stable review identities across restart and serializes
+local checks. See [durable history](docs/DURABLE_POLICY_HISTORY.md).
+
+Stored-history completeness is limited to accepted ingestion. Whole-database
+rollback, a compromised host, and reviews never submitted to the store remain
+outside its guarantees. Signatures do not establish evidence truth or resource
+access. Actual access and answer-release flags remain false.

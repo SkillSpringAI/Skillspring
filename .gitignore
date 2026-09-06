@@ -1,4 +1,10 @@
 # Node / npm
+
+# Local simulation trust stores (never publish operational history).
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
 node_modules/
 npm-debug.log*
 

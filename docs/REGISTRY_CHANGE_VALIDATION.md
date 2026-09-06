@@ -58,4 +58,5 @@ The added Git-fixture diagnostic uses isolated temporary repositories to exercis
 committed and staged changes, forbidden mutations/deletions/renames, missing
 companions, incorrect same-version matches, unknown families, missing history,
 and push/PR/manual selection. The PR fixture includes an independently advanced
-base branch. No AWS calls occur. Preflight now has 36 diagnostic steps.
+base branch. No AWS calls occur. This slice brought preflight to 36 diagnostic
+steps; the README records the current count after subsequent slices.

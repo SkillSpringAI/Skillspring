@@ -35,7 +35,9 @@ matching hashes do not verify evidence or satisfy pending reviews.
 Modes narrow independently granted scope; model classification cannot create
 clearance. Signed inputs are checked against pinned test trust. Revision and
 revocation history live only in memory, and a complete authenticated review
-store is absent. Hypothetical success must retain false actual-authority flags.
+store is absent in the in-memory adapter. The optional durable simulation stores
+accepted history in SQLite; see [its trust limits](DURABLE_POLICY_HISTORY.md).
+Hypothetical success must retain false actual-authority flags.
 
 Datasets inform decisions but do not grant permission or override the constitution.
 Likewise, a signature authenticates a statement against configured trust; it does
@@ -50,7 +52,7 @@ diagnostics, and review contract, registry, and provenance impact. Experimental
 schemas do not become operative authority simply by being added to the repository.
 
 Follow [contributing](../CONTRIBUTING.md) for regeneration and review steps.
-Run `npm run preflight`: TypeScript compilation and 36 offline diagnostic steps.
+Run `npm run preflight`: TypeScript compilation and 37 offline diagnostic steps.
 Fix failures at their source rather than weakening checks. Preserve historical
 live reports under their original manifest IDs and never commit credentials.
 
