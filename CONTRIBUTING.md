@@ -30,7 +30,11 @@ failure semantics, and a testable reason to exist.
 
 ## Verification and generated artifacts
 
-Preflight compiles TypeScript and runs 35 diagnostic steps, including fake
+CI compares committed base/head revisions; local hooks check staged and unstaged
+changes separately. Stage a registry's changelog, index, and exact generated module
+together. See [comparison selection and limits](docs/REGISTRY_CHANGE_VALIDATION.md).
+
+Preflight compiles TypeScript and runs 36 diagnostic steps, including fake
 provider responses, local HTTP requests, and ephemeral signing keys. It makes
 no AWS calls. Run live Bedrock commands separately only when explicitly intended;
 they incur charges and their results must retain the manifest used at invocation.

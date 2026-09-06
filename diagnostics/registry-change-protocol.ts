@@ -1,89 +1,99 @@
-﻿import { execSync } from "node:child_process";
-
-function must(cond: any, msg: string) {
-  if (!cond) throw new Error(msg);
-}
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 type DiffEntry = { status: string; file: string };
-
-function gitDiffNameStatus(args: string[]): DiffEntry[] {
-  const out = execSync(["git", "diff", "--name-status", ...args].join(" "), { encoding: "utf8" }).trim();
-  if (!out) return [];
-  return out.split("\n").map((line) => {
-    const [status, ...rest] = line.trim().split(/\s+/);
-    return { status, file: rest.join(" ") };
-  });
+export type Comparison = { base: string; head: string };
+const generatedStems: Record<string, string> = {
+  invariants: "invariants", "failure-codes": "failureCodes", "decision-codes": "decisionCodes"
+};
+function must(condition: unknown, message: string): asserts condition {
+  if (!condition) throw new Error(`registry-change-protocol: ${message}`);
 }
-
-function isVersionedRegistryJson(p: string): boolean {
-  // Match: schemas/registries/<name>.vN.json (not schema.json)
-  return /^schemas\/registries\/.+\.v[0-9]+\.json$/i.test(p.replace(/\\/g, "/"));
-}
-
-function isGeneratedRegistryTs(p: string): boolean {
-  // Match: runtime/registries/generated/<name>.vN.ts
-  return /^runtime\/registries\/generated\/.+\.v[0-9]+\.ts$/i.test(p.replace(/\\/g, "/"));
-}
-
-function norm(p: string): string {
-  return p.replace(/\\/g, "/");
-}
-
-function parseVersionedName(p: string): { stem: string; v: number } | null {
-  const n = norm(p);
-  const m = /\/([^\/]+)\.v([0-9]+)\.(json|ts)$/i.exec(n);
-  if (!m) return null;
-  return { stem: m[1], v: parseInt(m[2], 10) };
-}
-
-export async function run() {
-  // Check both staged and unstaged changes
-  const unstaged = gitDiffNameStatus([]);
-  const staged = gitDiffNameStatus(["--cached"]);
-  const diff = [...unstaged, ...staged];
-
-  // If nothing changed, pass
-  if (diff.length === 0) return { ok: true, changed: 0 };
-
-  const modifiedVersioned = diff.filter((d) => d.status === "M" && isVersionedRegistryJson(d.file));
-  must(
-    modifiedVersioned.length === 0,
-    "registry-change-protocol: versioned registry files are immutable. Do not modify existing *.vN.json. Create a new version file instead. Offenders: " +
-      modifiedVersioned.map((d) => norm(d.file)).join(", ")
-  );
-
-  const addedVersioned = diff.filter((d) => d.status === "A" && isVersionedRegistryJson(d.file));
-
-  // If no new versioned registry added, nothing to enforce beyond immutability
-  if (addedVersioned.length === 0) return { ok: true, changed: diff.length };
-
-  // Enforce: changelog updated
-  const changelogTouched = diff.some((d) => norm(d.file) === "schemas/registries/CHANGELOG.md" && (d.status === "M" || d.status === "A"));
-  must(changelogTouched, "registry-change-protocol: registry CHANGELOG.md must be updated when adding a new registry version.");
-
-  // Enforce: registryIndex touched
-  const registryIndexTouched = diff.some((d) => norm(d.file) === "runtime/registries/registryIndex.ts" && d.status === "M");
-  must(registryIndexTouched, "registry-change-protocol: runtime/registries/registryIndex.ts must be updated to point to the new latest registry versions.");
-
-  // Enforce: each added json version has a matching generated TS version added (or modified if already existed)
-  const genTouched = diff.filter((d) => isGeneratedRegistryTs(d.file) && (d.status === "A" || d.status === "M"));
-  const genKeys = new Set(genTouched.map((d) => {
-    const pv = parseVersionedName(d.file);
-    return pv ? `${pv.stem}.v${pv.v}` : "";
-  }).filter(Boolean));
-
-  for (const a of addedVersioned) {
-    const pv = parseVersionedName(a.file);
-    must(!!pv, `registry-change-protocol: could not parse versioned registry name: ${a.file}`);
-    // mapping stems: failure-codes -> failureCodes, invariants -> invariants (generated naming differs)
-    // We accept any generated TS file with matching ".vN" for this version.
-    const expectedKey = `v${pv!.v}`;
-    const hasAnyMatchingVersion = Array.from(genKeys).some((k) => k.endsWith(`.v${pv!.v}`) || k.includes(`v${pv!.v}`));
-    must(
-      hasAnyMatchingVersion,
-      `registry-change-protocol: added ${norm(a.file)} but no matching generated runtime registry *.v${pv!.v}.ts was added/updated in runtime/registries/generated.`
-    );
+function git(cwd: string, args: string[]): string {
+  // Preserve a hook's alternate index in its own repo; isolate fixture repos.
+  const env = { ...process.env };
+  if (resolve(cwd) !== resolve(process.cwd())) {
+    for (const key of Object.keys(env)) if (key.startsWith("GIT_")) delete env[key];
   }
+  try { return execFileSync("git", args, { cwd, env, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); }
+  catch { throw new Error(`registry-change-protocol: Git comparison failed (${args[0]}); required history may be unavailable`); }
+}
+function commit(cwd: string, ref: string): string {
+  must(typeof ref === "string" && ref.length > 0 && !/^0+$/.test(ref), "a nonzero comparison revision is required");
+  return git(cwd, ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`]).trim();
+}
+function mergeBase(cwd: string, base: string, head: string): string {
+  return git(cwd, ["merge-base", commit(cwd, base), commit(cwd, head)]).trim();
+}
 
-  return { ok: true, added_versions: addedVersioned.map((d) => norm(d.file)) };
+/** Select explicit endpoints; never silently fall back to a clean working tree in CI. */
+export function comparisonForEnvironment(cwd: string, env: NodeJS.ProcessEnv): Comparison | undefined {
+  if (env.REGISTRY_DIFF_BASE !== undefined || env.REGISTRY_DIFF_HEAD !== undefined) {
+    must(env.REGISTRY_DIFF_BASE && env.REGISTRY_DIFF_HEAD, "set both REGISTRY_DIFF_BASE and REGISTRY_DIFF_HEAD");
+    return { base: commit(cwd, env.REGISTRY_DIFF_BASE), head: commit(cwd, env.REGISTRY_DIFF_HEAD) };
+  }
+  if (!env.CI && !env.GITHUB_ACTIONS) return undefined;
+  must(env.GITHUB_EVENT_PATH, "CI requires explicit comparison revisions or a supported GitHub event");
+  const event = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf8"));
+  if (env.GITHUB_EVENT_NAME === "pull_request") {
+    const head = commit(cwd, event.pull_request?.head?.sha);
+    return { base: mergeBase(cwd, event.pull_request?.base?.sha, head), head };
+  }
+  if (env.GITHUB_EVENT_NAME === "push") {
+    must(!event.deleted, "deleted branch has no comparison head");
+    const head = commit(cwd, event.after);
+    if (event.created && /^0+$/.test(event.before)) {
+      const branch = event.repository?.default_branch;
+      must(typeof branch === "string" && branch.length > 0, "new branch requires the default branch reference");
+      const base = mergeBase(cwd, `refs/remotes/origin/${branch}`, head);
+      must(base !== head, "new branch has no distinct default-branch base; run manually with an explicit base");
+      return { base, head };
+    }
+    return { base: commit(cwd, event.before), head };
+  }
+  if (env.GITHUB_EVENT_NAME === "workflow_dispatch") {
+    return { base: commit(cwd, event.inputs?.base), head: commit(cwd, env.GITHUB_SHA!) };
+  }
+  throw new Error("registry-change-protocol: unsupported CI event; provide explicit comparison revisions");
+}
+
+function diff(cwd: string, args: string[]): DiffEntry[] {
+  const fields = git(cwd, ["diff", "--no-ext-diff", "--no-renames", "--name-status", "-z", ...args, "--"]).split("\0");
+  fields.pop();
+  const entries: DiffEntry[] = [];
+  for (let i = 0; i < fields.length; i += 2) entries.push({ status: fields[i], file: fields[i + 1] });
+  return entries;
+}
+function validate(entries: DiffEntry[]): void {
+  const registries = entries.filter(entry => /^schemas\/registries\/[^/]+\.v[0-9]+\.json$/.test(entry.file));
+  must(registries.every(entry => entry.status === "A"),
+    "versioned registry files are immutable; modifications, deletions, and renames are forbidden");
+  if (!registries.length) return;
+  const touched = (file: string) => entries.some(entry => entry.file === file && ["A", "M"].includes(entry.status));
+  must(touched("schemas/registries/CHANGELOG.md"), "registry CHANGELOG.md must be updated for a new registry version");
+  must(touched("runtime/registries/registryIndex.ts"), "registryIndex.ts must be updated for a new registry version");
+  for (const entry of registries) {
+    const match = /\/([^/]+)\.v([0-9]+)\.json$/.exec(entry.file)!;
+    must(Object.hasOwn(generatedStems, match[1]), `unknown registry family ${match[1]}; add an explicit generated mapping`);
+    const expected = `runtime/registries/generated/${generatedStems[match[1]]}.v${match[2]}.ts`;
+    must(touched(expected), `missing matching generated registry ${expected}`);
+  }
+}
+
+export function checkRegistryChanges(cwd: string, comparison?: Comparison) {
+  if (comparison) {
+    const entries = diff(cwd, [commit(cwd, comparison.base), commit(cwd, comparison.head)]);
+    validate(entries);
+    return { ok: true, changed: entries.length, mode: "committed" };
+  }
+  // Validate each independently: unstaged documentation cannot satisfy a staged addition.
+  const staged = diff(cwd, ["--cached"]);
+  const unstaged = diff(cwd, []);
+  validate(staged);
+  validate(unstaged);
+  return { ok: true, changed: staged.length + unstaged.length, mode: "local" };
+}
+export async function run() {
+  return checkRegistryChanges(process.cwd(), comparisonForEnvironment(process.cwd(), process.env));
 }
