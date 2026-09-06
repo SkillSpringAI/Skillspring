@@ -46,7 +46,9 @@ npm run preflight
 npm run dev -- "Explain governance."
 ```
 
-Preflight compiles TypeScript and runs **35 diagnostic steps** without AWS calls.
+Preflight compiles TypeScript and runs **36 diagnostic steps** without AWS calls.
+CI validates committed registry changes using explicit event comparison revisions;
+see [registry change validation](docs/REGISTRY_CHANGE_VALIDATION.md).
 Supported launch commands use tsx. The build is not a packaged distribution;
 the legacy `npm run run` script is not a supported launch path at this checkpoint.
 

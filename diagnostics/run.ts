@@ -22,6 +22,7 @@ import { checkDriftSnapshots } from "./drift-snapshot.js";
 import { run as checkRefusalPreservation } from "./refusal-preservation";
 import { run as checkRegistryCompleteness } from "./registry-completeness";
 import { run as checkRegistryChangeProtocol } from "./registry-change-protocol";
+import { checkRegistryChangeProtocolTests } from "./registry-change-protocol-tests.js";
 import { run as checkAllowPreservation } from "./allow-preservation";
 import { run as checkRegistryGeneratedSync } from "./registry-generated-sync";
 import { checkAuthorityArtifacts } from "./authority-artifacts.js";
@@ -57,6 +58,7 @@ async function main() {
   await runStep("refusal-preservation", () => checkRefusalPreservation());
   await runStep("registry-completeness", () => checkRegistryCompleteness());
   await runStep("registry-change-protocol", () => checkRegistryChangeProtocol());
+  await runStep("registry-change-protocol-git-fixtures", () => checkRegistryChangeProtocolTests());
   await runStep("registry-generated-sync", () => checkRegistryGeneratedSync());
   await runStep("lg-mapping", () => checkLgMapping());
   await runStep("allow-preservation", () => checkAllowPreservation());

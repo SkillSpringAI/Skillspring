@@ -2,6 +2,11 @@ name: CI
 
 on:
   workflow_dispatch:
+    inputs:
+      base:
+        description: "Required comparison base commit or ref"
+        required: true
+        type: string
   push:
     branches: ["**"]
   pull_request:
@@ -12,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4

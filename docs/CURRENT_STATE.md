@@ -45,7 +45,9 @@ schemas are not active authority and are outside the runtime governance manifest
 
 ## Verification and live evidence
 
-`npm run preflight` passes compilation and **35 diagnostic steps**.
+`npm run preflight` includes compilation and **36 diagnostic steps**. The added
+Git fixtures exercise CI comparison selection and registry change rules; see
+`docs/REGISTRY_CHANGE_VALIDATION.md`. The original checkpoint had 35 steps.
 `git diff --check` passes. The local workflow was exercised on Windows. Existing
 GitHub workflows install dependencies and run preflight with Node.js 24 on Ubuntu;
 both GitHub workflows were also observed passing for checkpoint commit `ddcdb70`.

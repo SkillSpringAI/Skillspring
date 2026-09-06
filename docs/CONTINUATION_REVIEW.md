@@ -24,6 +24,10 @@ above become blockers when promoting those simulations into operational use.
 
 ### 1. Make change validation meaningful in CI
 
+Implemented in the registry CI validation slice following this review. See
+[comparison rules and regression coverage](REGISTRY_CHANGE_VALIDATION.md).
+The recommendations below record the scope of that slice.
+
 Use a small `codex/` branch from reconciled `main`. Give registry-change
 validation an explicit base/head comparison for committed changes, while
 retaining index/worktree checks for local development. Fetch the required history
