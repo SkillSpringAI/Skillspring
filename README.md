@@ -12,6 +12,12 @@ with signed inputs. It is not a production security boundary or an autonomous ag
 
 ## Implemented surfaces
 
+`main` is the default and maintained development branch. Checkpoint tags preserve
+reviewed historical snapshots; they do not track subsequent fixes. The
+`codex/slice-1-repository-truth` branch records the original checkpoint work.
+See [repository conventions](docs/REPOSITORY_STATE.md) and the
+[continuation review](docs/CONTINUATION_REVIEW.md).
+
 | Surface | Current behavior |
 | --- | --- |
 | Governance pipeline | Classification, policy decisions, DLA/Permission Token checks, Lumens verification, evidence assessment, and output gating |

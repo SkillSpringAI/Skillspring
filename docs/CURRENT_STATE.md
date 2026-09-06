@@ -3,7 +3,9 @@
 Checkpoint: `checkpoint-2026-09-05-governance-candidates-signed-policy`.
 This reviewed milestone incorporates governance corrections and integration
 slices developed from baseline `458f5a4` (4 April 2026). The enclosing checkpoint
-commit/tag identifies the implementation described here.
+commit/tag identifies the implementation described here. Current `main` is the
+default maintained line and may contain later corrections and documentation;
+the checkpoint tag remains fixed. See `docs/REPOSITORY_STATE.md`.
 
 ## Implemented runtime and interfaces
 
@@ -46,7 +48,8 @@ schemas are not active authority and are outside the runtime governance manifest
 `npm run preflight` passes compilation and **35 diagnostic steps**.
 `git diff --check` passes. The local workflow was exercised on Windows. Existing
 GitHub workflows install dependencies and run preflight with Node.js 24 on Ubuntu;
-local success does not imply an unobserved remote workflow passed.
+both GitHub workflows were also observed passing for checkpoint commit `ddcdb70`.
+This evidence applies to that commit, not automatically to later changes.
 
 | User-reported AWS suite | Result | Evidence boundary |
 | --- | --- | --- |

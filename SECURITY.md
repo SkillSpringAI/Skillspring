@@ -22,8 +22,14 @@ made.
 
 ## Supported versions
 
-Only the current `main` branch and the latest published milestone, when one
-exists, are expected to receive security fixes.
+`main` is the default branch and the maintained development line. Security fixes
+are delivered there. Users of research checkpoints should update to current
+`main` to receive fixes.
+
+Checkpoint tags identify immutable reviewed snapshots, not separately supported
+release branches. Tags are not moved when fixes land. No backport or production
+support commitment is implied by a checkpoint. Any future supported release line
+must be explicitly listed here with its support scope.
 
 ## Security assumptions and limitations
 
