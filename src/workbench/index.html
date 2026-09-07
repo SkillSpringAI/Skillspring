@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkillSpring · Candidate review</title>
+  <meta name="description" content="Local synthetic candidate and evidence review workbench.">
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">SkillSpring <span>Research workspace</span></a><span class="badge">Local simulation</span></header>
+  <main>
+    <div class="heading"><div><p class="eyebrow">Evidence &amp; review</p><h1>Candidate review</h1></div>
+      <label>Review mode<select id="mode"><option value="DEFAULT">Default</option><option value="GOVERNANCE">Governance</option><option value="ARCHITECT">Architect</option></select></label></div>
+    <p class="notice">Synthetic draft, sources, and test signers. Review completion never releases an answer. History lasts for this server session.</p>
+    <div id="message" role="status" aria-live="polite">Loading the review workspace…</div>
+    <button type="button" id="retry" class="secondary" hidden>Retry loading review</button>
+    <noscript>This workbench needs JavaScript to load the draft and record assessments.</noscript>
+    <div id="workspace" hidden>
+      <section class="status-bar" aria-label="Review status"><div><span id="status" class="status"></span><p id="reason"></p><code id="reason-code"></code></div><div class="release">Answer release<strong>Disabled</strong></div></section>
+      <div class="columns"><div class="evidence-column">
+        <section class="panel"><div class="section-heading"><h2>01 / Draft &amp; evidence</h2><span class="badge neutral">Informational draft</span></div>
+          <p id="answer" class="answer"></p><p class="hint">Compare each claim with its bound source passage before recording a finding.</p>
+          <div id="claims"></div>
+          <details><summary>Full source &amp; provenance</summary><div id="sources"></div><dl id="provenance"></dl></details>
+        </section>
+        <section class="panel"><h2>Review history</h2><p class="hint">Accepted signed test assessments, in revision order. Rejection remains a blocker for this draft and audience.</p><ol id="history"></ol></section>
+      </div><aside class="panel review-panel"><h2>02 / Record an assessment</h2>
+        <p id="requirements" class="hint"></p><ul id="reviewers" class="reviewers"></ul>
+        <form id="assessment"><fieldset id="review-fields"><legend class="sr-only">Test reviewer assessment</legend>
+          <label>Test reviewer<select id="reviewer" required></select></label>
+          <div id="findings"></div>
+          <label>Authority claims<select id="authority"><option value="UNCERTAIN">Uncertain / not checked</option><option value="CLEARED">Cleared</option><option value="REJECTED">Rejected</option></select></label>
+          <label>Output checks<select id="output"><option value="UNCERTAIN">Uncertain / not checked</option><option value="PASS">Pass</option><option value="FAIL">Fail</option></select></label>
+          <label>Disposition<select id="decision"><option value="APPROVE">Record findings</option><option value="REJECT">Reject this draft</option></select></label>
+          <p id="disposition-help" class="hint">All claims must be supported and both checks must pass to qualify as a positive review.</p>
+          <button type="submit" class="primary">Save test assessment</button>
+        </fieldset></form>
+        <button type="button" id="refresh" class="secondary">Refresh saved review</button>
+        <p class="hint">Selecting a test reviewer does not authenticate a person. A refresh replaces unsaved selections with the latest saved assessment.</p>
+      </aside></div>
+      <footer id="session-info"></footer>
+    </div>
+  </main>
+</body></html>

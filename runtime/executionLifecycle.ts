@@ -27,6 +27,10 @@ export function canTransition(from: ExecutionStatus, to: ExecutionStatus): boole
   return transitions[from].includes(to);
 }
 
+export function isExecutionStatus(value: unknown): value is ExecutionStatus {
+  return typeof value === "string" && Object.hasOwn(transitions, value);
+}
+
 export function assertTransition(from: ExecutionStatus, to: ExecutionStatus): void {
   if (!canTransition(from, to)) throw new Error(`Invalid execution lifecycle transition: ${from} -> ${to}`);
 }

@@ -11,6 +11,7 @@ import { checkScopedPolicyBoundary } from "./scoped-policy-boundary.js";
 import { checkSignedPolicyVerifier } from "./signed-policy-verifier.js";
 import { checkDurablePolicyHistory } from "./durable-policy-history.js";
 import { checkCandidateEvidenceReview } from "./candidate-evidence-review.js";
+import { checkWorkbench } from "./workbench.js";
 import { run as checkMnSplit } from "./mn-split";
 import { checkDatasetIntegrity } from "./integrity-tests.js";
 import { checkEnforcementExpectations } from "./enforcement-tests.js";
@@ -89,6 +90,7 @@ async function main() {
   await runStep("signed-policy-verifier", () => checkSignedPolicyVerifier());
   await runStep("durable-policy-history", () => checkDurablePolicyHistory());
   await runStep("candidate-evidence-review", () => checkCandidateEvidenceReview());
+  await runStep("candidate-review-workbench", () => checkWorkbench());
 
   console.log("DIAG: PASS");
 }

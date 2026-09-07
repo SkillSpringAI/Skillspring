@@ -51,9 +51,15 @@ not establish an authenticated access workspace or grant privileges.
 All policy simulations retain false actual-authority flags. Draft review-policy
 schemas are not active authority and are outside the runtime governance manifest.
 
+The local [review workbench](REVIEW_WORKBENCH.md) provides an interactive
+synthetic draft/source inspection and signed test-assessment workflow. It uses
+session-only SQLite history, separate from the evaluation API, with no real
+identity, external candidate ingestion, or answer-release transition.
+
 ## Verification and live evidence
 
-`npm run preflight` includes compilation and **38 diagnostic steps**. Added
+`npm run preflight` includes compilation, a compiled CLI smoke test, and
+**39 diagnostic steps**. Added
 fixtures exercise CI registry comparisons, durable-history failure cases, and
 candidate evidence/assessment checks in all three modes;
 see `docs/REGISTRY_CHANGE_VALIDATION.md` and `docs/DURABLE_POLICY_HISTORY.md`.
@@ -92,8 +98,10 @@ for independent hash recomputation.
   declarations true or that a human performed them. Final answer release remains absent.
 - Dataset/keyword/import checks are regression evidence, not a complete security
   boundary or proof of constitutional coverage.
-- Build compiles source for checking; supported launch commands use tsx. The
-  legacy npm run run path is not a supported built distribution.
+- The compiled CLI is supported locally after `npm run build`, using
+  `npm run run -- "Explain governance."`. This is not a published distribution.
+  Current authority/replay corrections and their review status are recorded in
+  [the development slice log](DEVELOPMENT_SLICES.md).
 
 ## Review outcome and remaining decisions
 

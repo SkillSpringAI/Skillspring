@@ -48,11 +48,15 @@ npm run preflight
 npm run dev -- "Explain governance."
 ```
 
-Preflight compiles TypeScript and runs **38 diagnostic steps** without AWS calls.
+Preflight compiles TypeScript, smoke-tests the compiled CLI, and runs
+**39 diagnostic steps** without AWS calls.
 CI validates committed registry changes using explicit event comparison revisions;
 see [registry change validation](docs/REGISTRY_CHANGE_VALIDATION.md).
-Supported launch commands use tsx. The build is not a packaged distribution;
-the legacy `npm run run` script is not a supported launch path at this checkpoint.
+Development launch commands use tsx. After `npm run build`, launch the compiled
+CLI with `npm run run -- "Explain governance."`. The build writes a CommonJS
+package boundary inside `dist`; keep that file with the compiled output.
+This is a local build, not a published npm distribution.
+See [slice review and issue log](docs/DEVELOPMENT_SLICES.md) for current changes.
 
 Start the local API:
 
@@ -130,6 +134,12 @@ The [candidate evidence review slice](docs/CANDIDATE_EVIDENCE_REVIEW.md) connect
 that history to sourced drafts and reviewer attestations. Run
 `npm run demo:candidate-review` for a synthetic three-mode walkthrough; it makes
 no provider calls and performs no real human review.
+
+For an interactive local review, run `npm run workbench` and open
+http://127.0.0.1:8788. Inspect the synthetic draft and bound excerpts, record
+claim findings with test reviewers, and inspect review status and history.
+Reviews last for the server session; answer release stays disabled. See the
+[workbench guide](docs/REVIEW_WORKBENCH.md) for the workflow and trust limits.
 
 Read [contributing](CONTRIBUTING.md), [governance](GOVERNANCE.md),
 [security](SECURITY.md), and [engineer guidance](docs/INTERNAL_ENGINEER_HANDOFF.md)

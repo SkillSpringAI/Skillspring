@@ -57,7 +57,8 @@ diagnostics, and review contract, registry, and provenance impact. Experimental
 schemas do not become operative authority simply by being added to the repository.
 
 Follow [contributing](../CONTRIBUTING.md) for regeneration and review steps.
-Run `npm run preflight`: TypeScript compilation and 38 offline diagnostic steps.
+Run `npm run preflight`: TypeScript compilation, compiled CLI smoke checks,
+workbench JavaScript syntax validation, and 39 offline diagnostic steps.
 Fix failures at their source rather than weakening checks. Preserve historical
 live reports under their original manifest IDs and never commit credentials.
 

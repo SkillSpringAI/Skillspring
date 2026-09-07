@@ -34,8 +34,10 @@ CI compares committed base/head revisions; local hooks check staged and unstaged
 changes separately. Stage a registry's changelog, index, and exact generated module
 together. See [comparison selection and limits](docs/REGISTRY_CHANGE_VALIDATION.md).
 
-Preflight compiles TypeScript and runs 38 diagnostic steps, including fake
-provider responses, local HTTP requests, and ephemeral signing keys. It makes
+Preflight compiles TypeScript, checks workbench JavaScript syntax, smoke-tests
+the compiled CLI, and runs 39
+diagnostic steps, including fake provider responses, local HTTP requests, and
+ephemeral signing keys. It makes
 temporary SQLite stores and uses child processes to test write races and crash
 recovery. Node 24 currently reports its built-in SQLite API as experimental. It makes
 no AWS calls. Run live Bedrock commands separately only when explicitly intended;
