@@ -26,6 +26,7 @@ export type ActionJournal = {
   failure_code?: string;
 };
 
-export function isDependentExecutionAllowed(status: ExecutionStatus): boolean {
-  return status !== "UNCERTAIN" && status !== "FAILED" && status !== "REFUSED";
+/** Completion and outcome proof are both prerequisites; this does not grant authority. */
+export function isDependentExecutionAllowed(status: ExecutionStatus, outcomeProven = false): boolean {
+  return status === "COMPLETED" && outcomeProven === true;
 }

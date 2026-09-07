@@ -75,6 +75,7 @@ export function checkNegativeCapabilities(): void {
     const files = listFiles(d).filter((p) => p.endsWith(".ts"));
     for (const f of files) {
       const c = readFileSync(f, "utf8");
+      must(!c.includes("review-policy/"), `negative-capability: experimental review policy imported by core file ${f}`);
       const hit = fileContainsForbiddenImport(f, c);
       must(!hit, `negative-capability: forbidden module import in ${f}: ${hit}`);
     }
